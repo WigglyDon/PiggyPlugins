@@ -70,8 +70,10 @@ class AutoVorkathPlugin : Plugin() {
     private var isPrepared = false
     private var drankAntiFire = false
     private var drankRangePotion = false
+    private var drankAntiVenom = false
     private var lastDrankAntiFire: Long = 0
     private var lastDrankRangePotion: Long = 0
+    private var lastDrankAntivenom: Long = 0
 
     private val lootQueue: MutableList<ItemStack> = mutableListOf()
     private var lootId: MutableList<Int> = mutableListOf()
@@ -115,8 +117,10 @@ class AutoVorkathPlugin : Plugin() {
         botState = null
         drankAntiFire = false
         drankRangePotion = false
+        drankAntiVenom = false
         lastDrankAntiFire = 0
         lastDrankRangePotion = 0
+        lastDrankAntivenom = 0
         lootQueue.clear()
         acidPools.clear()
         breakHandler.stopPlugin(this)
@@ -551,6 +555,15 @@ class AutoVorkathPlugin : Plugin() {
             }
             return
         }
+        if (!drankAntiVenom && currentTime - lastDrankAntivenom > config.ANTIVENOM().time()) {
+            Inventory.search().nameContains(config.ANTIVENOM().toString()).first().ifPresent { antiVenom ->
+                InventoryInteraction.useItem(antiVenom, "Drink")
+                lastDrankAntivenom = System.currentTimeMillis()
+                drankAntiVenom = true
+                tickDelay = 2
+            }
+            return
+        }
 
         drinkPrayer()
 
@@ -559,7 +572,7 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem("Anti-venom", "Drink")
             }
         }
-        isPrepared = drankAntiFire && drankRangePotion && !inventoryHasLoot()
+        isPrepared = drankAntiFire && drankRangePotion && drankAntiVenom && !inventoryHasLoot()
         if (isPrepared) {
             changeStateTo(State.THINKING)
             return
@@ -581,6 +594,7 @@ class AutoVorkathPlugin : Plugin() {
                 isPrepared = false
                 drankRangePotion = false
                 drankAntiFire = false
+                drankAntiVenom = false
                 teleToHouse()
                 changeStateTo(State.WALKING_TO_BANK)
                 return
@@ -599,20 +613,23 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem(config.TELEPORT().toString())) {
             withdraw(config.TELEPORT().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.RANGEPOTION().toString()).result().size <= 1) {
+        if (BankInventory.search().nameContains(config.RANGEPOTION().toString()).result().size < 1) {
             withdraw(config.RANGEPOTION().toString(), 1)
         }
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size <= 2    ) {
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < 2    ) {
             withdraw(config.PRAYERPOTION().toString(), 1)
         }
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)
         }
-        if (BankInventory.search().nameContains(config.ANTIFIRE().toString()).result().size <= 1) {
+        if (BankInventory.search().nameContains(config.ANTIFIRE().toString()).result().size < 1) {
             withdraw(config.ANTIFIRE().toString(), 1)
+        }
+        if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
+            withdraw(config.ANTIVENOM().toString(), 1)
         }
         if (!Inventory.full()) {
             for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
@@ -635,6 +652,7 @@ class AutoVorkathPlugin : Plugin() {
         Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
                 && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
+                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
@@ -653,6 +671,7 @@ class AutoVorkathPlugin : Plugin() {
                 isPrepared = false
                 drankRangePotion = false
                 drankAntiFire = false
+                drankAntiVenom = false
                 initialAcidMove = false
                 teleToHouse()
                 changeStateTo(State.WALKING_TO_BANK)

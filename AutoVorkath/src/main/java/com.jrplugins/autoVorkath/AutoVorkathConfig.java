@@ -94,10 +94,18 @@ public interface AutoVorkathConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "antiVenomPotion",
+            name = "Antivenom Potion",
+            description = "What Antivenom potion to use?",
+            position = 8
+    )
+    default ANTIVENOM ANTIVENOM() { return ANTIVENOM.ANTI_VENOM_PLUS; }
+
+    @ConfigItem(
             keyName = "foodAmount",
             name = "Food Amount",
             description = "MAX FOOD : MIN FOOD",
-            position = 8
+            position = 9
     )
     default Dimension FOODAMOUNT() {
         return new Dimension(15, 10);
@@ -107,7 +115,7 @@ public interface AutoVorkathConfig extends Config {
             keyName = "poolDrinkat",
             name = "Ornate Pool Drink",
             description = "HEALTH : PRAYER",
-            position = 9
+            position = 10
     )
     default Dimension POOLDRINK() {
         return new Dimension(90, 90);
@@ -117,7 +125,7 @@ public interface AutoVorkathConfig extends Config {
             keyName = "eatat",
             name = "Eat at",
             description = "Eat at what health?",
-            position = 10
+            position = 11
     )
     default int EATAT() {
         return 75;
@@ -127,7 +135,7 @@ public interface AutoVorkathConfig extends Config {
             keyName = "food",
             name = "Food",
             description = "What food to use? (NOT MANTA RAY!)",
-            position = 11
+            position = 12
     )
     default String FOOD() {
         return "Shark";
