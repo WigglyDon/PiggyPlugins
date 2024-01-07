@@ -605,7 +605,7 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size <= 1) {
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size <= 2    ) {
             withdraw(config.PRAYERPOTION().toString(), 1)
         }
         if (!hasItem("Rune pouch")) {
@@ -705,7 +705,7 @@ class AutoVorkathPlugin : Plugin() {
         if (config.ACTIVATERIGOUR()) {
             PrayerInteraction.setPrayerState(Prayer.RIGOUR, on)
         }
-        PrayerInteraction.setPrayerState(Prayer.PROTECT_FROM_MAGIC, on)
+        PrayerInteraction.setPrayerState(Prayer.PROTECT_FROM_MISSILES, on)
     }
 
     private fun teleToHouse() {
