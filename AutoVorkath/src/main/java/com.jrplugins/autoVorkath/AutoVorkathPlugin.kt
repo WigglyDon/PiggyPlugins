@@ -73,7 +73,7 @@ class AutoVorkathPlugin : Plugin() {
     private var drankAntiVenom = false
     private var lastDrankAntiFire: Long = 0
     private var lastDrankRangePotion: Long = 0
-    private var lastDrankAntivenom: Long = 0
+    private var lastDrankAntiVenom: Long = 0
 
     private val lootQueue: MutableList<ItemStack> = mutableListOf()
     private var lootId: MutableList<Int> = mutableListOf()
@@ -120,7 +120,7 @@ class AutoVorkathPlugin : Plugin() {
         drankAntiVenom = false
         lastDrankAntiFire = 0
         lastDrankRangePotion = 0
-        lastDrankAntivenom = 0
+        lastDrankAntiVenom = 0
         lootQueue.clear()
         acidPools.clear()
         breakHandler.stopPlugin(this)
@@ -133,6 +133,7 @@ class AutoVorkathPlugin : Plugin() {
         if (e.message.contains("Oh dear, you are dead!")) {
             drankAntiFire = false
             drankRangePotion = false
+            drankAntiVenom = false
             isPrepared = false
             activatePrayers(false)
             EthanApiPlugin.stopPlugin(this)
@@ -141,6 +142,7 @@ class AutoVorkathPlugin : Plugin() {
             activatePrayers(false)
             drankAntiFire = false
             drankRangePotion = false
+            drankAntiVenom = false
             isPrepared = false
         }
         if (e.message.contains("There is no ammo left in your quiver.")) {
@@ -148,6 +150,7 @@ class AutoVorkathPlugin : Plugin() {
             EthanApiPlugin.sendClientMessage("No ammo, stopping plugin.")
             drankAntiFire = false
             drankRangePotion = false
+            drankAntiVenom = false
             isPrepared = false
             activatePrayers(false)
             EthanApiPlugin.stopPlugin(this)
@@ -364,6 +367,7 @@ class AutoVorkathPlugin : Plugin() {
             val vorkath = NPCs.search().nameContains("Vorkath").first().get().worldLocation
             val middle = WorldPoint(vorkath.x + 3, vorkath.y - 5, 0)
             if (isVorkathAsleep()) {
+                EthanApiPlugin.sendClientMessage("vorkath sleepy deepy")
                 changeStateTo(State.WALKING_TO_BANK)
                 return
             }
@@ -439,6 +443,7 @@ class AutoVorkathPlugin : Plugin() {
                             TileObjectInteraction.interact(iceChunk, "Climb-over")
                         }
                     } else {
+                        EthanApiPlugin.sendClientMessage("FAIL IN WALKINGTOVORKATHSTATE")
                         changeStateTo(State.WALKING_TO_BANK)
                     }
                 }
@@ -523,11 +528,13 @@ class AutoVorkathPlugin : Plugin() {
         } else { // If player doesn't have all potions and food
             drankRangePotion = false
             drankAntiFire = false
+            drankAntiVenom = false
             isPrepared = false
             if (bankArea.contains(client.localPlayer.worldLocation)) { // Player is in bank area
                 changeStateTo(State.BANKING)
                 return
             } else { // Player is not in bank area
+                EthanApiPlugin.sendClientMessage("fail at readyToFight()")
                 changeStateTo(State.WALKING_TO_BANK)
                 return
             }
@@ -555,10 +562,10 @@ class AutoVorkathPlugin : Plugin() {
             }
             return
         }
-        if (!drankAntiVenom && currentTime - lastDrankAntivenom > config.ANTIVENOM().time()) {
+        if (!drankAntiVenom && currentTime - lastDrankAntiVenom > config.ANTIVENOM().time()) {
             Inventory.search().nameContains(config.ANTIVENOM().toString()).first().ifPresent { antiVenom ->
                 InventoryInteraction.useItem(antiVenom, "Drink")
-                lastDrankAntivenom = System.currentTimeMillis()
+                lastDrankAntiVenom = System.currentTimeMillis()
                 drankAntiVenom = true
                 tickDelay = 2
             }
@@ -567,17 +574,13 @@ class AutoVorkathPlugin : Plugin() {
 
         drinkPrayer()
 
-        if (Equipment.search().nameContains("Serpentine helm").result().isEmpty()) {
-            Inventory.search().nameContains("Anti-venom").first().ifPresent {
-                InventoryInteraction.useItem("Anti-venom", "Drink")
-            }
-        }
         isPrepared = drankAntiFire && drankRangePotion && drankAntiVenom && !inventoryHasLoot()
         if (isPrepared) {
             changeStateTo(State.THINKING)
             return
         } else {
             changeStateTo(State.WALKING_TO_BANK)
+            EthanApiPlugin.sendClientMessage("fail in prepareState().")
             return
         }
     }
@@ -595,6 +598,7 @@ class AutoVorkathPlugin : Plugin() {
                 drankRangePotion = false
                 drankAntiFire = false
                 drankAntiVenom = false
+                EthanApiPlugin.sendClientMessage("NO MORE PRAYER")
                 teleToHouse()
                 changeStateTo(State.WALKING_TO_BANK)
                 return
@@ -646,8 +650,7 @@ class AutoVorkathPlugin : Plugin() {
     private fun inHouse(): Boolean = TileObjects.search().nameContains(config.PORTAL().toString()).result().isNotEmpty()
 
     private fun isMoving(): Boolean = EthanApiPlugin.isMoving() || client.localPlayer.animation != -1
-    private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= 70
-
+    private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= 50
     private fun readyToFight(): Boolean =
         Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
                 && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
@@ -674,6 +677,7 @@ class AutoVorkathPlugin : Plugin() {
                 drankAntiVenom = false
                 initialAcidMove = false
                 teleToHouse()
+                EthanApiPlugin.sendClientMessage("NO MORE FOOD!!!")
                 changeStateTo(State.WALKING_TO_BANK)
                 return
             }

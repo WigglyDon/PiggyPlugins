@@ -11,10 +11,9 @@ import lombok.RequiredArgsConstructor
 @Getter
 @RequiredArgsConstructor
 enum class ANTIVENOM(private val antiVenomName: String, private val time: Int) {
-    ANTI_VENOM_PLUS("Anti-venom+", 4);
+    ANTI_VENOM_PLUS("Anti-venom+", 3);
 
 
     override fun toString(): String = antiVenomName
-    fun time(): Int = ((time * .01) * 60 * 1000).toInt() // time to drink ( 1% of the antivenom effect )
-
+    fun time(): Int = ((time * .3) * 60 * 1000).toInt() // time to drink ( 30% of the antivenom effect )
 }
