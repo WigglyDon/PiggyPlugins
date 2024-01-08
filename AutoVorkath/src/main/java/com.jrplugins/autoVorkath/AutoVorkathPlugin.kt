@@ -10,6 +10,7 @@ import com.example.InteractionApi.*
 import com.example.Packets.MousePackets
 import com.example.Packets.MovementPackets
 import com.example.Packets.WidgetPackets
+import com.example.Packets.NPCPackets
 import com.google.inject.Provides
 import com.piggyplugins.PiggyUtils.API.SpellUtil
 import com.piggyplugins.PiggyUtils.BreakHandler.ReflectBreakHandler
@@ -17,7 +18,6 @@ import net.runelite.api.*
 import net.runelite.api.coords.WorldArea
 import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.*
-import net.runelite.api.widgets.Widget
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.NpcLootReceived
@@ -362,32 +362,11 @@ class AutoVorkathPlugin : Plugin() {
                 }
             }
         }
-//        private fun teleToHouse() {
-//            if (config.TELEPORT().toString() == "Rune pouch") {
-//                val houseTele = SpellUtil.getSpellWidget(client, "Teleport to House");
-//                MousePackets.queueClickPacket();
-//                WidgetPackets.queueWidgetAction(houseTele, "Cast");
-//            }
-//            else {
-//                Inventory.search().nameContains(config.TELEPORT().toString()).first().ifPresent { teleport ->
-//                    InventoryInteraction.useItem(teleport, config.TELEPORT().action())
-//                }
-//            }
-//        }
-        else if (config.SLAYERSTAFF().toString() == "Rune pouch") {
-                val crumbleUndead = SpellUtil.getSpellWidget(client, "Crumble Undead");
 
-            if (crumbleUndead != null && crumbleUndead.actions != null) {
-                MousePackets.queueClickPacket();
-                WidgetPackets.queueWidgetAction(crumbleUndead, "Cast");
-                NPCs.search().nameContains("Zombified Spawn").first().ifPresent { spawn ->
-                    NPCInteraction.interact(spawn, "Cast Crumble Undead")
-                }
-            }
-            else {
-                EthanApiPlugin.sendClientMessage("ziggy ${crumbleUndead.actions}")
-                EthanApiPlugin.sendClientMessage("zoggy ${crumbleUndead}")
-                return
+        else if (config.SLAYERSTAFF().toString() == "Rune pouch") {
+            val crumbleUndead = SpellUtil.getSpellWidget(client, "Crumble Undead");
+            NPCs.search().nameContains("Zombified Spawn").first().ifPresent { spawn ->
+                NPCPackets.queueWidgetOnNPC(spawn, crumbleUndead);
             }
         }
     }
