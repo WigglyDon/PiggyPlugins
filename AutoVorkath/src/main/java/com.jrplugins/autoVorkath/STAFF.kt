@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor
 @RequiredArgsConstructor
 enum class STAFF(private val staffName: String) {
     SLAYER_STAFF("Slayer's staff"),
-    SLAYER_STAFF_E("Slayer's staff (e)");
+    SLAYER_STAFF_E("Slayer's staff (e)"),
+    RUNE_POUCH("Rune pouch");
 
     override fun toString(): String {
         return staffName

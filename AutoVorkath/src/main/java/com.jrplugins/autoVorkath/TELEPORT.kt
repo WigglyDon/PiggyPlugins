@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor
 enum class TELEPORT(private val teleportName: String, private val action: String) {
     CONSTRUCT_CAPE_T("Construct. cape(t)", "Tele to POH"),
     CONSTRUCT_CAPE("Construct. cape", "Tele to POH"),
-    HOUSE_TAB("Teleport to house", "Break");
+    HOUSE_TAB("Teleport to house", "Break"),
+    HOUSE_RUNES("Rune pouch", "Cast");
 
     override fun toString(): String = teleportName
 

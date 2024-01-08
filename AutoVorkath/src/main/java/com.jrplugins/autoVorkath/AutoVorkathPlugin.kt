@@ -11,11 +11,13 @@ import com.example.Packets.MousePackets
 import com.example.Packets.MovementPackets
 import com.example.Packets.WidgetPackets
 import com.google.inject.Provides
+import com.piggyplugins.PiggyUtils.API.SpellUtil
 import com.piggyplugins.PiggyUtils.BreakHandler.ReflectBreakHandler
 import net.runelite.api.*
 import net.runelite.api.coords.WorldArea
 import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.*
+import net.runelite.api.widgets.Widget
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.NpcLootReceived
@@ -167,6 +169,7 @@ class AutoVorkathPlugin : Plugin() {
                 lootId.add(item.id)
             }
         }
+        EthanApiPlugin.sendClientMessage("Loot queue size: ${lootQueue.size}");
         changeStateTo(State.LOOTING)
     }
 
@@ -245,6 +248,7 @@ class AutoVorkathPlugin : Plugin() {
         }
         lootQueue.forEach {
             if (!isMoving()) {
+                // add shark eat if full?
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
                         item.interact(false)
@@ -254,6 +258,7 @@ class AutoVorkathPlugin : Plugin() {
                     return
                 } else {
                     EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
+                    EthanApiPlugin.sendClientMessage("could not loot $lootQueue")
                     lootQueue.clear()
                     changeStateTo(State.WALKING_TO_BANK)
                     return
@@ -345,14 +350,44 @@ class AutoVorkathPlugin : Plugin() {
             return
         }
         activatePrayers(false)
-        if (Equipment.search().nameContains(config.SLAYERSTAFF().toString()).result().isEmpty()) {
-            Inventory.search().nameContains(config.SLAYERSTAFF().toString()).first().ifPresent { staff ->
-                InventoryInteraction.useItem(staff, "Wield")
+        if (config.SLAYERSTAFF().toString() != "Rune pouch") {
+            if (Equipment.search().nameContains(config.SLAYERSTAFF().toString()).result().isEmpty()) {
+                Inventory.search().nameContains(config.SLAYERSTAFF().toString()).first().ifPresent { staff ->
+                    InventoryInteraction.useItem(staff, "Wield")
+                }
+                return
+            } else {
+                NPCs.search().nameContains("Zombified Spawn").first().ifPresent { spawn ->
+                    NPCInteraction.interact(spawn, "Attack")
+                }
             }
-            return
-        } else {
-            NPCs.search().nameContains("Zombified Spawn").first().ifPresent { spawn ->
-                NPCInteraction.interact(spawn, "Attack")
+        }
+//        private fun teleToHouse() {
+//            if (config.TELEPORT().toString() == "Rune pouch") {
+//                val houseTele = SpellUtil.getSpellWidget(client, "Teleport to House");
+//                MousePackets.queueClickPacket();
+//                WidgetPackets.queueWidgetAction(houseTele, "Cast");
+//            }
+//            else {
+//                Inventory.search().nameContains(config.TELEPORT().toString()).first().ifPresent { teleport ->
+//                    InventoryInteraction.useItem(teleport, config.TELEPORT().action())
+//                }
+//            }
+//        }
+        else if (config.SLAYERSTAFF().toString() == "Rune pouch") {
+                val crumbleUndead = SpellUtil.getSpellWidget(client, "Crumble Undead");
+
+            if (crumbleUndead != null && crumbleUndead.actions != null) {
+                MousePackets.queueClickPacket();
+                WidgetPackets.queueWidgetAction(crumbleUndead, "Cast");
+                NPCs.search().nameContains("Zombified Spawn").first().ifPresent { spawn ->
+                    NPCInteraction.interact(spawn, "Cast Crumble Undead")
+                }
+            }
+            else {
+                EthanApiPlugin.sendClientMessage("ziggy ${crumbleUndead.actions}")
+                EthanApiPlugin.sendClientMessage("zoggy ${crumbleUndead}")
+                return
             }
         }
     }
@@ -648,9 +683,6 @@ class AutoVorkathPlugin : Plugin() {
     private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= 50
     private fun readyToFight(): Boolean =
         Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
-//                && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
-//                && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
-//                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
@@ -727,8 +759,15 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun teleToHouse() {
-        Inventory.search().nameContains(config.TELEPORT().toString()).first().ifPresent { teleport ->
-            InventoryInteraction.useItem(teleport, config.TELEPORT().action())
+        if (config.TELEPORT().toString() == "Rune pouch") {
+            val houseTele = SpellUtil.getSpellWidget(client, "Teleport to House");
+            MousePackets.queueClickPacket();
+            WidgetPackets.queueWidgetAction(houseTele, "Cast");
+        }
+        else {
+            Inventory.search().nameContains(config.TELEPORT().toString()).first().ifPresent { teleport ->
+                InventoryInteraction.useItem(teleport, config.TELEPORT().action())
+            }
         }
     }
 
