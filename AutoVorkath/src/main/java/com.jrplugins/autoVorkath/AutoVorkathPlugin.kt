@@ -464,7 +464,7 @@ class AutoVorkathPlugin : Plugin() {
                         NPCs.search().nameContains("Jack").nearestToPlayer().ifPresent { bank ->
                             NPCInteraction.interact(bank, "Bank")
                         }
-                        tickDelay = 1
+                        tickDelay = 3
                         return
                     }
                 } else {
@@ -653,9 +653,9 @@ class AutoVorkathPlugin : Plugin() {
     private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= 50
     private fun readyToFight(): Boolean =
         Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
-                && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
-                && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
-                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
+//                && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
+//                && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
+//                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
