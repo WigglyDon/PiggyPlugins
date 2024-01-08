@@ -366,11 +366,6 @@ class AutoVorkathPlugin : Plugin() {
         } else {
             val vorkath = NPCs.search().nameContains("Vorkath").first().get().worldLocation
             val middle = WorldPoint(vorkath.x + 3, vorkath.y - 5, 0)
-            if (isVorkathAsleep()) {
-                EthanApiPlugin.sendClientMessage("vorkath sleepy deepy")
-                changeStateTo(State.WALKING_TO_BANK)
-                return
-            }
             if (client.localPlayer.interacting == null) {
                 NPCs.search().nameContains("Vorkath").first().ifPresent { vorkath ->
                     NPCInteraction.interact(vorkath, "Attack")
