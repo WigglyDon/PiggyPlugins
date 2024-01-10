@@ -178,7 +178,32 @@ class AutoVorkathPlugin : Plugin() {
             if (Inventory.search().nameContains(config.CROSSBOW().toString()).result().isNotEmpty()) {
                 InventoryInteraction.useItem(config.CROSSBOW().toString(), "Wield")
             }
+            if (isVorkathAsleep()) {
+                changeStateTo(State.LOOTING)
+            }
+            else {
             changeStateTo(State.FIGHTING)
+            }
+        }
+    }
+
+    @Subscribe
+    fun onActorDeath(e: ActorDeath) {
+        if (e.actor.name == "Zombified Spawn") {
+            activatePrayers(on = true)
+            if (isVorkathAsleep()) {
+                EthanApiPlugin.sendClientMessage("VORKATH IS ASLEEP AFTER SPAWN DIED")
+            }
+        }
+        if (e.actor.name == "Vorkath") {
+            val vorkath = NPCs.search().nameContains("Vorkath").first().get().worldLocation
+            val middle = WorldPoint(vorkath.x + 3, vorkath.y - 5, 0)
+            if (client.localPlayer.worldLocation != middle) {
+                if (!isMoving()) {
+                    MousePackets.queueClickPacket()
+                    MovementPackets.queueMovement(middle)
+                }
+            }
         }
     }
 
@@ -348,7 +373,7 @@ class AutoVorkathPlugin : Plugin() {
             changeStateTo(State.THINKING)
             return
         }
-        activatePrayers(false)
+        activatePrayers(false) //stop attack
         if (config.SLAYERSTAFF().toString() != "Rune pouch") {
             if (Equipment.search().nameContains(config.SLAYERSTAFF().toString()).result().isEmpty()) {
                 Inventory.search().nameContains(config.SLAYERSTAFF().toString()).first().ifPresent { staff ->
@@ -364,6 +389,8 @@ class AutoVorkathPlugin : Plugin() {
 
         else if (config.SLAYERSTAFF().toString() == "Rune pouch") {
             val crumbleUndead = SpellUtil.getSpellWidget(client, "Crumble Undead");
+            MousePackets.queueClickPacket()
+            MovementPackets.queueMovement(client.localPlayer.worldLocation)
             NPCs.search().nameContains("Zombified Spawn").first().ifPresent { spawn ->
                 NPCPackets.queueWidgetOnNPC(spawn, crumbleUndead);
             }
@@ -372,8 +399,9 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun fightingState() {
         if (runIsOff()) enableRun()
+        activatePrayers(true)
         acidPools.clear()
-        if (!inVorkathArea() || isVorkathAsleep()) {
+        if (!inVorkathArea()) {
             EthanApiPlugin.sendClientMessage("FIGHTING state change to THINKING")
             changeStateTo(State.THINKING)
             return
