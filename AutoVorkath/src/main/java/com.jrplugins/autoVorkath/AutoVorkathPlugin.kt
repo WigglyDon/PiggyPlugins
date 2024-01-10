@@ -169,7 +169,6 @@ class AutoVorkathPlugin : Plugin() {
                 lootId.add(item.id)
             }
         }
-        EthanApiPlugin.sendClientMessage("Loot queue size: ${lootQueue.size}");
         changeStateTo(State.LOOTING)
     }
 
@@ -374,7 +373,8 @@ class AutoVorkathPlugin : Plugin() {
     private fun fightingState() {
         if (runIsOff()) enableRun()
         acidPools.clear()
-        if (!inVorkathArea()) {
+        if (!inVorkathArea() || isVorkathAsleep()) {
+            EthanApiPlugin.sendClientMessage("FIGHTING state change to THINKING")
             changeStateTo(State.THINKING)
             return
         } else {
@@ -543,7 +543,6 @@ class AutoVorkathPlugin : Plugin() {
                 changeStateTo(State.BANKING)
                 return
             } else { // Player is not in bank area
-                EthanApiPlugin.sendClientMessage("fail at readyToFight()")
                 changeStateTo(State.WALKING_TO_BANK)
                 return
             }
