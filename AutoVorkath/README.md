@@ -19,3 +19,5 @@ https://discord.gg/PwRB5yt8KH
 - Needs POH
 - Needs Ornate rejuvenation pool
 - Needs Lunar Isles Portal in POH
+
+Updated by Don Walsh
