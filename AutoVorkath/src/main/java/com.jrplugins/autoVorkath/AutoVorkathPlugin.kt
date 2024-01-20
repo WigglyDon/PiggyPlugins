@@ -268,12 +268,12 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun lootingState() {
         if (lootQueue.isEmpty() || TileItems.search().empty()) {
-            if (Inventory.getItemAmount("Shark") < 3) {
+            if (Inventory.getItemAmount("Shark") < 6) {
                 EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
             }
-            if (Inventory.getItemAmount("Shark") >= 3) {
+            if (Inventory.getItemAmount("Shark") >= 6) {
                 EthanApiPlugin.sendClientMessage("Have enough food for another kill")
                 changeStateTo(State.THINKING, 1)
                 return
@@ -478,8 +478,6 @@ class AutoVorkathPlugin : Plugin() {
     private fun pokeState() {
         if (isVorkathAsleep()) {
             acidPools.clear()
-            lootQueue.clear()
-            lootId.clear()
             if (!isMoving()) {
                 NPCs.search().withAction("Poke").first().ifPresent { sleepingVorkath ->
                     NPCInteraction.interact(sleepingVorkath, "Poke")
@@ -638,7 +636,7 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem(potion, "Drink")
                 lastDrankRangePotion = System.currentTimeMillis()
                 drankRangePotion = true
-                tickDelay = 1
+                tickDelay = 2
             }
             return
         }
@@ -647,7 +645,7 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem(potion, "Drink")
                 lastDrankAntiFire = System.currentTimeMillis()
                 drankAntiFire = true
-                tickDelay = 1
+                tickDelay = 2
             }
             return
         }
@@ -656,7 +654,7 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem(potion, "Drink")
                 lastDrankAntiVenom = System.currentTimeMillis()
                 drankAntiVenom = true
-                tickDelay = 1
+                tickDelay = 2
             }
             return
         }
@@ -727,6 +725,8 @@ class AutoVorkathPlugin : Plugin() {
                 withdraw(config.FOOD(), 1)
             }
         }
+        lootQueue.clear()
+        lootId.clear()
         changeStateTo(State.THINKING)
     }
 
@@ -744,6 +744,9 @@ class AutoVorkathPlugin : Plugin() {
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
                 && Inventory.search().nameContains(config.PRAYERPOTION().toString()).result().isNotEmpty()
+                && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
+                && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
+                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
 
     private fun needsToEat(at: Int): Boolean = client.getBoostedSkillLevel(Skill.HITPOINTS) <= at
 
