@@ -31,8 +31,8 @@ import kotlin.math.abs
 
 
 @PluginDescriptor(
-    name = "<html><font color=\"#9ddbff\">[JR]</font> Auto Vorkath </html>",
-    description = "JR - Auto vorkath",
+    name = "<html><font color=\"#9ddbff\">[WD]</font> Auto Vorkath </html>",
+    description = "WD - Auto vorkath",
     tags = ["vorkath", "auto", "auto prayer"],
     enabledByDefault = false
 )
@@ -268,14 +268,18 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun lootingState() {
         if (lootQueue.isEmpty() || TileItems.search().empty()) {
-            changeStateTo(State.WALKING_TO_BANK, 1)
-            return
-        }
-        if (Inventory.search().nameContains(config.CROSSBOW().toString()).result().isNotEmpty()) {
-            Inventory.search().nameContains(config.CROSSBOW().toString()).first().ifPresent { crossbow ->
-                InventoryInteraction.useItem(crossbow, "Wield")
+            if (Inventory.getItemAmount("Shark") < 3) {
+                EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
+                changeStateTo(State.WALKING_TO_BANK, 1)
+                return
+            }
+            if (Inventory.getItemAmount("Shark") >= 3) {
+                EthanApiPlugin.sendClientMessage("Have enough food for another kill")
+                changeStateTo(State.PREPARE, 1)
+                return
             }
         }
+
         lootQueue.forEach {
             if (!isMoving()) {
                 // add shark eat if full?
