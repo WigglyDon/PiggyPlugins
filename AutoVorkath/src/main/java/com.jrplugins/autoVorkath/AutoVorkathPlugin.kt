@@ -291,7 +291,7 @@ class AutoVorkathPlugin : Plugin() {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
                         item.interact(false)
                         lootQueue.removeAt(lootQueue.indexOf(it))
-                        tickDelay = if (isMoving()) 3 else 1
+//                        tickDelay = if (isMoving()) 3 else 1
                     }
                     return
                 } else {
