@@ -275,7 +275,7 @@ class AutoVorkathPlugin : Plugin() {
             }
             if (Inventory.getItemAmount("Shark") >= 3) {
                 EthanApiPlugin.sendClientMessage("Have enough food for another kill")
-                changeStateTo(State.PREPARE, 1)
+                changeStateTo(State.THINKING, 1)
                 return
             }
         }
@@ -285,6 +285,7 @@ class AutoVorkathPlugin : Plugin() {
                 if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
                     EthanApiPlugin.sendClientMessage("Inventory Full, Eating Shark")
                     InventoryInteraction.useItem("Shark", "Eat");
+                    return
                 }
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
@@ -628,28 +629,31 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun prepareState() {
         val currentTime = System.currentTimeMillis()
+        val rangePotion = Inventory.search().nameContains(config.RANGEPOTION().toString()).first()
+        val antiFirePotion = Inventory.search().nameContains(config.ANTIFIRE().toString()).first()
+        val antiVenomPotion = Inventory.search().nameContains(config.ANTIFIRE().toString()).first()
 
-        if (!drankRangePotion && currentTime - lastDrankRangePotion > config.RANGEPOTION().time()) {
-            Inventory.search().nameContains(config.RANGEPOTION().toString()).first().ifPresent { rangePotion ->
-                InventoryInteraction.useItem(rangePotion, "Drink")
+        if (!drankRangePotion && currentTime - lastDrankRangePotion > config.RANGEPOTION().time() && rangePotion.isPresent) {
+            rangePotion.ifPresent { potion ->
+                InventoryInteraction.useItem(potion, "Drink")
                 lastDrankRangePotion = System.currentTimeMillis()
                 drankRangePotion = true
                 tickDelay = 2
             }
             return
         }
-        if (!drankAntiFire && currentTime - lastDrankAntiFire > config.ANTIFIRE().time()) {
-            Inventory.search().nameContains(config.ANTIFIRE().toString()).first().ifPresent { antiFire ->
-                InventoryInteraction.useItem(antiFire, "Drink")
+        if (!drankAntiFire && currentTime - lastDrankAntiFire > config.ANTIFIRE().time() && antiFirePotion.isPresent) {
+            antiFirePotion.ifPresent { potion ->
+                InventoryInteraction.useItem(potion, "Drink")
                 lastDrankAntiFire = System.currentTimeMillis()
                 drankAntiFire = true
                 tickDelay = 2
             }
             return
         }
-        if (!drankAntiVenom && currentTime - lastDrankAntiVenom > config.ANTIVENOM().time()) {
-            Inventory.search().nameContains(config.ANTIVENOM().toString()).first().ifPresent { antiVenom ->
-                InventoryInteraction.useItem(antiVenom, "Drink")
+        if (!drankAntiVenom && currentTime - lastDrankAntiVenom > config.ANTIVENOM().time() && antiVenomPotion.isPresent) {
+            antiVenomPotion.ifPresent { potion ->
+                InventoryInteraction.useItem(potion, "Drink")
                 lastDrankAntiVenom = System.currentTimeMillis()
                 drankAntiVenom = true
                 tickDelay = 2
@@ -657,15 +661,13 @@ class AutoVorkathPlugin : Plugin() {
             return
         }
 
-        drinkPrayer()
-
-        isPrepared = drankAntiFire && drankRangePotion && drankAntiVenom && !inventoryHasLoot()
+        isPrepared = drankAntiFire && drankRangePotion && drankAntiVenom
         if (isPrepared) {
             changeStateTo(State.THINKING)
             return
         } else {
             changeStateTo(State.WALKING_TO_BANK)
-            EthanApiPlugin.sendClientMessage("fail in prepareState().")
+            EthanApiPlugin.sendClientMessage("Not prepared. Banking.")
             return
         }
     }
@@ -742,7 +744,6 @@ class AutoVorkathPlugin : Plugin() {
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
                 && Inventory.search().nameContains(config.PRAYERPOTION().toString()).result().isNotEmpty()
-                && !inventoryHasLoot()
 
     private fun needsToEat(at: Int): Boolean = client.getBoostedSkillLevel(Skill.HITPOINTS) <= at
 
