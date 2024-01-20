@@ -282,7 +282,10 @@ class AutoVorkathPlugin : Plugin() {
 
         lootQueue.forEach {
             if (!isMoving()) {
-                // add shark eat if full?
+                if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
+                    EthanApiPlugin.sendClientMessage("Inventory Full, Eating Shark")
+                    InventoryInteraction.useItem("Shark", "Eat");
+                }
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
                         item.interact(false)
