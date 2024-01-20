@@ -739,14 +739,15 @@ class AutoVorkathPlugin : Plugin() {
     private fun isMoving(): Boolean = EthanApiPlugin.isMoving() || client.localPlayer.animation != -1
     private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= config.PRAYERAT();
     private fun readyToFight(): Boolean =
-        Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
+        (Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
                 && Inventory.search().nameContains(config.PRAYERPOTION().toString()).result().isNotEmpty()
-                && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
-                && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
-                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
+                && (Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty() || drankRangePotion)
+                && (Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty() || drankAntiFire)
+                && (Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty() || drankAntiVenom)
+                )
 
     private fun needsToEat(at: Int): Boolean = client.getBoostedSkillLevel(Skill.HITPOINTS) <= at
 
