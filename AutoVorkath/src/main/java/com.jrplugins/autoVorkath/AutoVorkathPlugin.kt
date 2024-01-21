@@ -167,7 +167,7 @@ class AutoVorkathPlugin : Plugin() {
         if (!running) return
         val items = event.items
         items.stream().forEach { item ->
-            if (item != null) {
+            if (item != null && item.id != 1751) {
                 lootQueue.add(item)
                 lootId.add(item.id)
             }
@@ -288,11 +288,8 @@ class AutoVorkathPlugin : Plugin() {
                 }
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
-                        // does not add un-noted blue dragon hide
-                        if (item.tileItem.id != 1751) {
                         item.interact(false)
                         lootQueue.removeAt(lootQueue.indexOf(it))
-                        }
                     }
                     return
                 } else {
