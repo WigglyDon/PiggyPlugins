@@ -4,6 +4,7 @@ package com.polyplugins.AutoBoner;
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
+import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.EthanApiPlugin.Collections.query.NPCQuery;
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.TileObjectInteraction;
@@ -26,6 +27,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 import com.example.Packets.WidgetPackets;
 
+import java.io.Console;
 import java.util.Optional;
 
 @PluginDescriptor(
@@ -80,6 +82,29 @@ public class AutoBonerPlugin extends Plugin {
             return;
         }
 
+        TileObjects.search().withAction("Open doors").first().ifPresent(door -> {
+            EthanApiPlugin.sendClientMessage("sensed close door");
+            MousePackets.queueClickPacket();
+            TileObjectInteraction.interact(door, "Open doors");
+        });
+
+//        if (Inventory.search().onlyUnnoted().nameContains(config.boneName()).empty()) {
+//            Inventory.search().onlyNoted().nameContains(config.boneName()).first().ifPresent(note -> {
+//                NPCs.search().nameContains("Elder Chaos druid").first().ifPresent(npc -> {
+//                    Widgets.search().withTextContains("Exchange All:").first().ifPresent(widget -> {
+//                        MousePackets.queueClickPacket();
+//                        WidgetPackets.queueResumePause(widget.getId(), -1);
+//                        timeout = 0;
+//                    });
+//                    MousePackets.queueClickPacket();
+//                    NPCPackets.queueWidgetOnNPC(npc, note);
+//
+//
+//                });
+//            });
+//        }
+
+
         Inventory.search().onlyUnnoted().nameContains(config.boneName()).first().ifPresent(bone -> {
             TileObjects.search().nameContains(config.altarName()).first().ifPresent(altar -> {
                 MousePackets.queueClickPacket();
@@ -89,12 +114,14 @@ public class AutoBonerPlugin extends Plugin {
         });
     }
 
+
+    // Elder Chaos druid
     @Subscribe
     private void onPlayerSpawned(PlayerSpawned playerSpawned) {
 
         Player p = playerSpawned.getPlayer();
         if (!p.getName().equals("Beosot")) {
-            EthanApiPlugin.sendClientMessage("PLAYER SPOT: " + playerSpawned.getPlayer().getName());
+            System.out.println("player spotted: " + playerSpawned.getPlayer().getName());
             //logout packet
             WidgetPackets.queueWidgetActionPacket(1, 11927560, -1, -1);
         }
