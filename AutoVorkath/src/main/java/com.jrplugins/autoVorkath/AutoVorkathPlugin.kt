@@ -274,7 +274,6 @@ class AutoVorkathPlugin : Plugin() {
                 return
             }
             if (Inventory.getItemAmount("Shark") >= 6) {
-                EthanApiPlugin.sendClientMessage("Have enough food for another kill")
                 changeStateTo(State.THINKING, 1)
                 return
             }
@@ -289,9 +288,11 @@ class AutoVorkathPlugin : Plugin() {
                 }
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
+                        // does not add un-noted blue dragon hide
+                        if (item.tileItem.id != 1751) {
                         item.interact(false)
                         lootQueue.removeAt(lootQueue.indexOf(it))
-//                        tickDelay = if (isMoving()) 3 else 1
+                        }
                     }
                     return
                 } else {
@@ -346,9 +347,6 @@ class AutoVorkathPlugin : Plugin() {
         }
 
         val safeTile: WorldPoint? = findSafeTiles()
-        //println("Acid pools: $acidPools")
-        //println("Left Tile: $swPoint")
-        //println("Safe tile: $safeTile")
 
         val playerLocation = client.localPlayer.worldLocation
 
@@ -699,20 +697,30 @@ class AutoVorkathPlugin : Plugin() {
                 lootId.remove(id)
             }
         }
+        if (BankInventory.search().nameContains("Divine ranging potion(1)").result().size > 0) {
+            BankInventoryInteraction.useItem("Divine ranging potion(1)", "Deposit-All")
+        }
+        if (BankInventory.search().nameContains("Extended super antifire(1)").result().size > 0) {
+            BankInventoryInteraction.useItem("Extended super antifire(1)", "Deposit-All")
+        }
+        if (BankInventory.search().nameContains("Anti-venom+(1)").result().size > 0) {
+            BankInventoryInteraction.useItem("Anti-venom+(1)", "Deposit-All")
+        }
+
         if (!hasItem(config.TELEPORT().toString())) {
             withdraw(config.TELEPORT().toString(), 1)
-        }
-        if (BankInventory.search().nameContains(config.RANGEPOTION().toString()).result().size < 1) {
-            withdraw(config.RANGEPOTION().toString(), 1)
         }
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < 2    ) {
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < 3    ) {
             withdraw(config.PRAYERPOTION().toString(), 1)
         }
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)
+        }
+        if (BankInventory.search().nameContains(config.RANGEPOTION().toString()).result().size < 1) {
+            withdraw(config.RANGEPOTION().toString(), 1)
         }
         if (BankInventory.search().nameContains(config.ANTIFIRE().toString()).result().size < 1) {
             withdraw(config.ANTIFIRE().toString(), 1)
