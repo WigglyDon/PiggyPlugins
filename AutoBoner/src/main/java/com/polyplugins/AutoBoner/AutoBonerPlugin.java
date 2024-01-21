@@ -28,6 +28,7 @@ import net.runelite.client.util.HotkeyListener;
 import com.example.Packets.WidgetPackets;
 
 import java.io.Console;
+import java.util.Objects;
 import java.util.Optional;
 
 @PluginDescriptor(
@@ -82,35 +83,33 @@ public class AutoBonerPlugin extends Plugin {
             return;
         }
 
-        TileObjects.search().withAction("Open doors").first().ifPresent(door -> {
-            EthanApiPlugin.sendClientMessage("sensed close door");
-            MousePackets.queueClickPacket();
-            TileObjectInteraction.interact(door, "Open doors");
-        });
-
-//        if (Inventory.search().onlyUnnoted().nameContains(config.boneName()).empty()) {
-//            Inventory.search().onlyNoted().nameContains(config.boneName()).first().ifPresent(note -> {
-//                NPCs.search().nameContains("Elder Chaos druid").first().ifPresent(npc -> {
-//                    Widgets.search().withTextContains("Exchange All:").first().ifPresent(widget -> {
-//                        MousePackets.queueClickPacket();
-//                        WidgetPackets.queueResumePause(widget.getId(), -1);
-//                        timeout = 0;
-//                    });
-//                    MousePackets.queueClickPacket();
-//                    NPCPackets.queueWidgetOnNPC(npc, note);
-//
-//
-//                });
-//            });
-//        }
-
-
         Inventory.search().onlyUnnoted().nameContains(config.boneName()).first().ifPresent(bone -> {
             TileObjects.search().nameContains(config.altarName()).first().ifPresent(altar -> {
                 MousePackets.queueClickPacket();
                 MousePackets.queueClickPacket();
                 ObjectPackets.queueWidgetOnTileObject(bone, altar);
             });
+        });
+
+        if (Inventory.search().onlyUnnoted().nameContains(config.boneName()).empty()) {
+            Inventory.search().onlyNoted().nameContains(config.boneName()).first().ifPresent(note -> {
+                NPCs.search().nameContains("Elder Chaos druid").first().ifPresent(npc -> {
+                    Widgets.search().withTextContains("Exchange All:").first().ifPresent(widget -> {
+                        MousePackets.queueClickPacket();
+                        WidgetPackets.queueResumePause(widget.getId(), 3);
+                        timeout = 1;
+                    });
+                    MousePackets.queueClickPacket();
+                    NPCPackets.queueWidgetOnNPC(npc, note);
+
+
+                });
+            });
+        }
+
+        TileObjects.search().nameContains("Large door").first().ifPresent(door -> {
+            MousePackets.queueClickPacket();
+            TileObjectInteraction.interact(door, "Open");
         });
     }
 
