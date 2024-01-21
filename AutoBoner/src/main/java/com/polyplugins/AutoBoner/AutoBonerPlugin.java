@@ -2,7 +2,9 @@ package com.polyplugins.AutoBoner;
 
 
 import com.example.EthanApiPlugin.Collections.Inventory;
+import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
+import com.example.EthanApiPlugin.Collections.query.NPCQuery;
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.TileObjectInteraction;
 import com.example.Packets.*;
@@ -23,6 +25,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
 import com.example.Packets.WidgetPackets;
+
+import java.util.Optional;
 
 @PluginDescriptor(
         name = "<html><font color=\"#7ecbf2\">[PJ]</font>AutoBoner</html>",
@@ -76,15 +80,6 @@ public class AutoBonerPlugin extends Plugin {
             return;
         }
 
-        //test
-        //run
-//        MousePackets.queueClickPacket();
-        EthanApiPlugin.sendClientMessage("test");
-//        WidgetPackets.queueWidgetActionPacket(1, 10485787, -1, -1);
-        //logout
-        WidgetPackets.queueWidgetActionPacket(1, 11927560, -1, -1);
-        //test
-
         Inventory.search().onlyUnnoted().nameContains(config.boneName()).first().ifPresent(bone -> {
             TileObjects.search().nameContains(config.altarName()).first().ifPresent(altar -> {
                 MousePackets.queueClickPacket();
@@ -94,18 +89,16 @@ public class AutoBonerPlugin extends Plugin {
         });
     }
 
-//    @Subscribe
-//    private void onPlayerSpawned(PlayerSpawned playerSpawned) {
-//
-//            Player p = playerSpawned.getPlayer();
-//
-//
-//    }
+    @Subscribe
+    private void onPlayerSpawned(PlayerSpawned playerSpawned) {
 
-
-
-
-
+        Player p = playerSpawned.getPlayer();
+        if (!p.getName().equals("Beosot")) {
+            EthanApiPlugin.sendClientMessage("PLAYER SPOT: " + playerSpawned.getPlayer().getName());
+            //logout packet
+            WidgetPackets.queueWidgetActionPacket(1, 11927560, -1, -1);
+        }
+    }
 
 
     private final HotkeyListener toggle = new HotkeyListener(() -> config.toggle()) {
