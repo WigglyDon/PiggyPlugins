@@ -725,6 +725,7 @@ class AutoVorkathPlugin : Plugin() {
         if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
             withdraw(config.ANTIVENOM().toString(), 1)
         }
+        tickDelay = 1
         if (!Inventory.full()) {
             for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
                 withdraw(config.FOOD(), 1)
