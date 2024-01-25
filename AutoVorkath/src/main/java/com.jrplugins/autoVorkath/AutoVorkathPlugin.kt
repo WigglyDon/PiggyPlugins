@@ -284,7 +284,6 @@ class AutoVorkathPlugin : Plugin() {
                 if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
                     EthanApiPlugin.sendClientMessage("Inventory Full, Eating Shark")
                     InventoryInteraction.useItem("Shark", "Eat");
-                    return
                 }
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
