@@ -284,6 +284,7 @@ class AutoVorkathPlugin : Plugin() {
                 if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
                     EthanApiPlugin.sendClientMessage("Inventory Full, Eating Shark")
                     InventoryInteraction.useItem("Shark", "Eat");
+                    return
                 }
                 if (!Inventory.full()) {
                     TileItems.search().withId(it.id).first().ifPresent { item ->
@@ -653,12 +654,18 @@ class AutoVorkathPlugin : Plugin() {
             return
         }
 
+        tickDelay = 1
+
         isPrepared = drankAntiFire && drankRangePotion && drankAntiVenom
         if (isPrepared) {
             changeStateTo(State.THINKING)
             return
         } else {
             changeStateTo(State.WALKING_TO_BANK)
+            EthanApiPlugin.sendClientMessage(" isPrepared: $isPrepared")
+            EthanApiPlugin.sendClientMessage(" drankAntiFire: $drankAntiFire")
+            EthanApiPlugin.sendClientMessage(" drankRangePotion: $drankRangePotion")
+            EthanApiPlugin.sendClientMessage(" drankAntiVenom: $drankAntiVenom")
             EthanApiPlugin.sendClientMessage("Not prepared. Banking.")
             return
         }
