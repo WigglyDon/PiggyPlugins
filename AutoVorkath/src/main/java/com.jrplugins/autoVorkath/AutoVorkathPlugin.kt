@@ -9,8 +9,8 @@ import com.example.EthanApiPlugin.EthanApiPlugin
 import com.example.InteractionApi.*
 import com.example.Packets.MousePackets
 import com.example.Packets.MovementPackets
-import com.example.Packets.WidgetPackets
 import com.example.Packets.NPCPackets
+import com.example.Packets.WidgetPackets
 import com.google.inject.Provides
 import com.piggyplugins.PiggyUtils.API.SpellUtil
 import com.piggyplugins.PiggyUtils.BreakHandler.ReflectBreakHandler
@@ -280,15 +280,19 @@ class AutoVorkathPlugin : Plugin() {
         }
 
         lootQueue.forEach {
-//            if (!isMoving()) {
+            if (!isMoving()) {
+
                 if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
                     InventoryInteraction.useItem("Shark", "Eat");
                     return
                 }
-                if (!Inventory.full()) {
-                    // It sends both of these instantly when it loots an item
-                    TileItems.search().withId(it.id).first().ifPresent { item ->
+
+                    if (!Inventory.full()) {
+                        TileItems.search().withId(it.id).first().ifPresent { item: ETileItem ->
+                        EthanApiPlugin.sendClientMessage("TileItem loop: item: $item")
                         item.interact(false)
+
+                        EthanApiPlugin.sendClientMessage("lootqueue size before remove: ${lootQueue.size}")
                         lootQueue.removeAt(lootQueue.indexOf(it))
                     }
                     return
@@ -298,9 +302,9 @@ class AutoVorkathPlugin : Plugin() {
                     lootQueue.clear()
                     changeStateTo(State.WALKING_TO_BANK)
                     return
-                }
             }
-//        }
+            }
+        }
     }
 
     private fun acidState() {
