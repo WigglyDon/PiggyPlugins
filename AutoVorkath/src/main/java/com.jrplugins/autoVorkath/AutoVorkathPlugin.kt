@@ -278,9 +278,11 @@ class AutoVorkathPlugin : Plugin() {
     fun onVarbitChanged(event: VarbitChanged) {
 
         if (event.varpId == VarPlayer.POISON) {
+            if (event.value >= 1000000) {
                 Inventory.search().nameContains("Anti-venom").first().ifPresent { potion ->
                     InventoryInteraction.useItem(potion, "Drink")
                 }
+            }
         }
 
         if (event.varbitId == Varbits.SUPER_ANTIFIRE) {
@@ -651,22 +653,22 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun thinkingState() {
-        if (readyToFight()) { // Check if player has all potions and food
-            if (inVorkathArea()) { // Check if player in Vorkath area
-                    changeStateTo(State.POKE)
+        if (!inVorkathArea()) { // Check if player is not in Vorkath area
+            if (readyToFight()) { // Check if player has all potions and food
+                changeStateTo(State.WALKING_TO_VORKATH) // Player is prepared, walk to Vorkath
+                return
+            } else {
+                if (bankArea.contains(client.localPlayer.worldLocation)) { // Player is in bank area
+                    changeStateTo(State.BANKING)
                     return
-            } else { // walk to vorkath
-                changeStateTo(State.WALKING_TO_VORKATH)
-                return
+                } else { // Player is not in bank area
+                    changeStateTo(State.WALKING_TO_BANK)
+                    return
+                }
             }
-        } else { // If player doesn't have all potions and food
-            if (bankArea.contains(client.localPlayer.worldLocation)) { // Player is in bank area
-                changeStateTo(State.BANKING)
-                return
-            } else { // Player is not in bank area
-                changeStateTo(State.WALKING_TO_BANK)
-                return
-            }
+        } else { // Player is already in Vorkath's area
+            changeStateTo(State.POKE) // Proceed with the fight
+            return
         }
     }
 
@@ -754,6 +756,9 @@ class AutoVorkathPlugin : Plugin() {
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
+                && Inventory.search().nameContains(config.ANTIVENOM().toString()).result().isNotEmpty()
+                && Inventory.search().nameContains(config.ANTIFIRE().toString()).result().isNotEmpty()
+                && Inventory.search().nameContains(config.RANGEPOTION().toString()).result().isNotEmpty()
                 )
 
     private fun needsToEat(at: Int): Boolean = client.getBoostedSkillLevel(Skill.HITPOINTS) <= at
