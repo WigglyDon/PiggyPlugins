@@ -277,7 +277,7 @@ class AutoVorkathPlugin : Plugin() {
     @Subscribe
     fun onVarbitChanged(event: VarbitChanged) {
 
-        if (event.varbitId == VarPlayer.POISON) {
+        if (event.varpId == VarPlayer.POISON) {
                 Inventory.search().nameContains("Anti-venom").first().ifPresent { potion ->
                     InventoryInteraction.useItem(potion, "Drink")
                 }
@@ -549,14 +549,6 @@ class AutoVorkathPlugin : Plugin() {
                 }
             } else {
                 if (inVorkathArea()) {
-                    if (!drankAntiFire) {
-                        Inventory.search().nameContains("Extended super antifire").first().ifPresent {
-                                potion -> InventoryInteraction.useItem(potion, "Drink")
-                        }
-                        drankAntiFire = true
-                        tickDelay = 2
-                        return
-                    }
                     if (!drankRangePotion) {
                         Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
                                 potion -> InventoryInteraction.useItem(potion, "Drink")
@@ -575,6 +567,14 @@ class AutoVorkathPlugin : Plugin() {
                         TileObjectInteraction.interact(boat, "Travel")
                     }
                 } else {
+                    if (!drankAntiFire) {
+                        Inventory.search().nameContains("Extended super antifire").first().ifPresent {
+                                potion -> InventoryInteraction.useItem(potion, "Drink")
+                        }
+                        drankAntiFire = true
+                        tickDelay = 2
+                        return
+                    }
                     if (TileObjects.search().withId(31990).result().isNotEmpty()) {
                         TileObjects.search().withId(31990).first().ifPresent { iceChunk ->
                             TileObjectInteraction.interact(iceChunk, "Climb-over")
