@@ -25,7 +25,6 @@ import net.runelite.client.game.ItemManager
 import net.runelite.client.game.ItemStack
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
-import net.runelite.client.plugins.grounditems.GroundItemsPlugin
 import net.runelite.client.ui.overlay.OverlayManager
 import java.awt.event.KeyEvent
 import javax.inject.Inject
@@ -81,9 +80,6 @@ class AutoVorkathPlugin : Plugin() {
     private var lastDrankAntiFire: Long = 0
     private var lastDrankRangePotion: Long = 0
     private var lastDrankAntiVenom: Long = 0
-
-    private val lootQueue: MutableList<ItemStack> = mutableListOf()
-
     private val lootList: MutableSet<Int> = mutableSetOf()
 
     private var lootId: MutableList<Int> = mutableListOf()
@@ -132,7 +128,7 @@ class AutoVorkathPlugin : Plugin() {
         lastDrankAntiFire = 0
         lastDrankRangePotion = 0
         lastDrankAntiVenom = 0
-        lootQueue.clear()
+        lootList.clear()
         acidPools.clear()
         breakHandler.stopPlugin(this)
         breakHandler.unregisterPlugin(this)
@@ -175,13 +171,6 @@ class AutoVorkathPlugin : Plugin() {
     fun onNpcLootReceived(event: NpcLootReceived) {
         if (!running) return
         val items = event.items
-        items.stream().forEach { item ->
-            if (item != null && item.id != 1751) {
-                lootQueue.add(item)
-                lootId.add(item.id)
-            }
-        }
-
         val vorkathLootIds = items.asSequence()
             .map { it }
             .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE() } //price filter
@@ -301,9 +290,6 @@ class AutoVorkathPlugin : Plugin() {
                 return
             }
         }
-
-        EthanApiPlugin.sendClientMessage("------------------------------")
-        EthanApiPlugin.sendClientMessage("lootList: ${lootList.size}")
 
         val currentGroundItemIds = TileItems.search().tileItems.asSequence()
             .map { it.tileItem }
@@ -797,7 +783,7 @@ class AutoVorkathPlugin : Plugin() {
                 withdraw(config.FOOD(), 1)
             }
         }
-        lootQueue.clear()
+        lootList.clear()
         lootId.clear()
         changeStateTo(State.THINKING)
     }
