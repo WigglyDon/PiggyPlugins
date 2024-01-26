@@ -90,6 +90,7 @@ class AutoVorkathPlugin : Plugin() {
     private val fremennikArea: WorldArea = WorldArea(2627, 3672, 24, 30, 0)
 
     enum class State {
+        TESTING,
         WALKING_TO_BANK,
         BANKING,
         WALKING_TO_VORKATH,
@@ -106,7 +107,7 @@ class AutoVorkathPlugin : Plugin() {
 
     override fun startUp() {
         println("Auto Vorkath Plugin Activated")
-        botState = State.THINKING
+        botState = State.TESTING
         running = client.gameState == GameState.LOGGED_IN
         breakHandler.registerPlugin(this)
         breakHandler.startPlugin(this)
@@ -249,6 +250,7 @@ class AutoVorkathPlugin : Plugin() {
             }
 
             when (botState) {
+                State.TESTING -> testingState()
                 State.WALKING_TO_BANK -> walkingToBankState()
                 State.BANKING -> bankingState()
                 State.WALKING_TO_VORKATH -> walkingToVorkathState()
@@ -266,6 +268,11 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
+    private fun testingState() {
+        var item = TileItems.search().nameContains("bolt tips").first()
+        EthanApiPlugin.sendClientMessage("testingState: ${item.get().tileItem.id}")
+    }
+
     private fun lootingState() {
         if (lootQueue.isEmpty() || TileItems.search().empty()) {
             if (Inventory.getItemAmount("Shark") < 6) {
@@ -280,20 +287,21 @@ class AutoVorkathPlugin : Plugin() {
         }
 
         lootQueue.forEach {
-            if (!isMoving()) {
+            if (!TileItems.search().empty()) {
 
                 if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
                     InventoryInteraction.useItem("Shark", "Eat");
                     return
                 }
+                //gets stuck on double item drop that stacks to one stack
 
                     if (!Inventory.full()) {
                         TileItems.search().withId(it.id).first().ifPresent { item: ETileItem ->
                         EthanApiPlugin.sendClientMessage("TileItem loop: item: $item")
                         item.interact(false)
 
-                        EthanApiPlugin.sendClientMessage("lootqueue size before remove: ${lootQueue.size}")
                         lootQueue.removeAt(lootQueue.indexOf(it))
+                        EthanApiPlugin.sendClientMessage("items left on queue: ${lootQueue.size}")
                     }
                     return
                 } else {
@@ -302,7 +310,7 @@ class AutoVorkathPlugin : Plugin() {
                     lootQueue.clear()
                     changeStateTo(State.WALKING_TO_BANK)
                     return
-            }
+                }
             }
         }
     }
