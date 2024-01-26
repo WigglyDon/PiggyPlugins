@@ -15,6 +15,7 @@ import com.google.inject.Provides
 import com.piggyplugins.PiggyUtils.API.SpellUtil
 import com.piggyplugins.PiggyUtils.BreakHandler.ReflectBreakHandler
 import net.runelite.api.*
+import net.runelite.api.annotations.Varbit
 import net.runelite.api.coords.WorldArea
 import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.*
@@ -279,10 +280,17 @@ class AutoVorkathPlugin : Plugin() {
     fun onVarbitChanged(event: VarbitChanged) {
         if (event.varbitId == Varbits.SUPER_ANTIFIRE) {
             val superAntiFireVarb = event.value
-            EthanApiPlugin.sendClientMessage("antifire varbit: $superAntiFireVarb")
             if (superAntiFireVarb <= 1) {
                 Inventory.search().nameContains("Extended super antifire").first().ifPresent {
-                    antifire -> InventoryInteraction.useItem(antifire, "Drink")
+                    potion -> InventoryInteraction.useItem(potion, "Drink")
+                }
+            }
+        }
+        if (event.varbitId == Varbits.DIVINE_RANGING) {
+            val rangePotVarb = event.value
+            if (rangePotVarb <= 1) {
+                Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
+                    potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
             }
         }
@@ -652,18 +660,9 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun prepareState() {
         val currentTime = System.currentTimeMillis()
-        val rangePotion = Inventory.search().nameContains(config.RANGEPOTION().toString()).first()
+
         val antiVenomPotion = Inventory.search().nameContains(config.ANTIVENOM().toString()).first()
 
-        if (!drankRangePotion && currentTime - lastDrankRangePotion > config.RANGEPOTION().time() && rangePotion.isPresent) {
-            rangePotion.ifPresent { potion ->
-                InventoryInteraction.useItem(potion, "Drink")
-                lastDrankRangePotion = System.currentTimeMillis()
-                drankRangePotion = true
-                tickDelay = 2
-            }
-            return
-        }
         if (!drankAntiVenom && currentTime - lastDrankAntiVenom > config.ANTIVENOM().time() && antiVenomPotion.isPresent) {
             antiVenomPotion.ifPresent { potion ->
                 InventoryInteraction.useItem(potion, "Drink")
@@ -676,14 +675,13 @@ class AutoVorkathPlugin : Plugin() {
 
         tickDelay = 1
 
-        isPrepared = drankRangePotion && drankAntiVenom
+        isPrepared = drankAntiVenom
         if (isPrepared) {
             changeStateTo(State.THINKING)
             return
         } else {
             changeStateTo(State.WALKING_TO_BANK)
             EthanApiPlugin.sendClientMessage(" isPrepared: $isPrepared")
-            EthanApiPlugin.sendClientMessage(" drankRangePotion: $drankRangePotion")
             EthanApiPlugin.sendClientMessage(" drankAntiVenom: $drankAntiVenom")
             EthanApiPlugin.sendClientMessage("Not prepared. Banking.")
             return
