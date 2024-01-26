@@ -149,4 +149,12 @@ public interface AutoVorkathConfig extends Config {
         return "Shark";
     }
 
+    @ConfigItem(
+            keyName = "price",
+            name = "Price",
+            description = "Minimum loot price",
+            position = 14
+    )
+    default int MIN_PRICE() { return 0; }
+
 }

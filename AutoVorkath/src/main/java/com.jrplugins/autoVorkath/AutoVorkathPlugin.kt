@@ -83,6 +83,9 @@ class AutoVorkathPlugin : Plugin() {
     private var lastDrankAntiVenom: Long = 0
 
     private val lootQueue: MutableList<ItemStack> = mutableListOf()
+
+    private val lootList: MutableSet<Int> = mutableSetOf()
+
     private var lootId: MutableList<Int> = mutableListOf()
     private var acidPools: HashSet<WorldPoint> = hashSetOf()
 
@@ -112,7 +115,7 @@ class AutoVorkathPlugin : Plugin() {
 
     override fun startUp() {
         println("Auto Vorkath Plugin Activated")
-        botState = State.TESTING
+        botState = State.THINKING
         running = client.gameState == GameState.LOGGED_IN
         breakHandler.registerPlugin(this)
         breakHandler.startPlugin(this)
@@ -178,6 +181,17 @@ class AutoVorkathPlugin : Plugin() {
                 lootId.add(item.id)
             }
         }
+
+        val vorkathLootIds = items.asSequence()
+            .map { it }
+            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE() } //price filter
+            .map { it.id }
+            .toSet()
+
+        lootList.addAll(vorkathLootIds)
+        EthanApiPlugin.sendClientMessage("vorkath dropped ${lootList.size} valuable items.")
+
+
         changeStateTo(State.LOOTING)
     }
 
@@ -273,14 +287,10 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
-    private fun testingState() {
-        val item = TileItems.search().first().get()
-        val price = itemManager.getItemPrice(item.tileItem.id) * item.tileItem.quantity
-        EthanApiPlugin.sendClientMessage("testingState: ${item.tileItem.id} price: $price")
-    }
+    private fun testingState() {    }
 
     private fun lootingState() {
-        if (lootQueue.isEmpty() || TileItems.search().empty()) {
+        if (lootList.isEmpty() || TileItems.search().empty()) {
             if (Inventory.getItemAmount("Shark") < 6) {
                 EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
                 changeStateTo(State.WALKING_TO_BANK, 1)
@@ -292,33 +302,65 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
 
-        lootQueue.forEach {
-            if (!TileItems.search().empty()) {
+        EthanApiPlugin.sendClientMessage("------------------------------")
+        EthanApiPlugin.sendClientMessage("lootList: ${lootList.size}")
 
-                if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
-                    InventoryInteraction.useItem("Shark", "Eat");
-                    return
+        val currentGroundItemIds = TileItems.search().tileItems.asSequence()
+            .map { it.tileItem }
+            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE() } //price filter
+            .map { it.id }
+            .toSet()
+
+        lootList.addAll(currentGroundItemIds)
+        lootList.retainAll(currentGroundItemIds)
+
+        lootList.forEach {
+            if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
+                InventoryInteraction.useItem("Shark", "Eat");
+                return
+            }
+
+            if (!Inventory.full()) {
+                TileItems.search().withId(it).first().ifPresent { item: ETileItem ->
+                    item.interact(false)
                 }
-                //gets stuck on double item drop that stacks to one stack
-
-                    if (!Inventory.full()) {
-                        TileItems.search().withId(it.id).first().ifPresent { item: ETileItem ->
-                        EthanApiPlugin.sendClientMessage("TileItem loop: item: $item")
-                        item.interact(false)
-
-                        lootQueue.removeAt(lootQueue.indexOf(it))
-                        EthanApiPlugin.sendClientMessage("items left on queue: ${lootQueue.size}")
-                    }
-                    return
-                } else {
-                    EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
-                    EthanApiPlugin.sendClientMessage("could not loot $lootQueue")
-                    lootQueue.clear()
-                    changeStateTo(State.WALKING_TO_BANK)
-                    return
-                }
+                return
+            } else {
+                EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
+                EthanApiPlugin.sendClientMessage("could not loot $lootList")
+                lootList.clear()
+                changeStateTo(State.WALKING_TO_BANK)
+                return
             }
         }
+
+
+
+//        lootQueue.forEach {
+//            if (!TileItems.search().empty()) {
+//
+//                if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
+//                    InventoryInteraction.useItem("Shark", "Eat");
+//                    return
+//                }
+//                //gets stuck on double item drop that stacks to one stack
+//
+//                    if (!Inventory.full()) {
+//                        TileItems.search().withId(it.id).first().ifPresent { item: ETileItem ->
+//                        item.interact(false)
+//
+//                        lootQueue.removeAt(lootQueue.indexOf(it))
+//                    }
+//                    return
+//                } else {
+//                    EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
+//                    EthanApiPlugin.sendClientMessage("could not loot $lootList")
+//                        lootList.clear()
+//                    changeStateTo(State.WALKING_TO_BANK)
+//                    return
+//                }
+//            }
+//        }
     }
 
     private fun acidState() {
