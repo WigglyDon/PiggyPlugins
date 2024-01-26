@@ -80,9 +80,10 @@ class AutoVorkathPlugin : Plugin() {
     private var lastDrankAntiFire: Long = 0
     private var lastDrankRangePotion: Long = 0
     private var lastDrankAntiVenom: Long = 0
-    private val lootList: MutableSet<Int> = mutableSetOf()
 
-    private var lootId: MutableList<Int> = mutableListOf()
+    private val lootList: MutableSet<Int> = mutableSetOf()
+    private var lootIds: MutableSet<Int> = mutableSetOf()
+
     private var acidPools: HashSet<WorldPoint> = hashSetOf()
 
     private var initialAcidMove = false
@@ -178,8 +179,6 @@ class AutoVorkathPlugin : Plugin() {
             .toSet()
 
         lootList.addAll(vorkathLootIds)
-        EthanApiPlugin.sendClientMessage("vorkath dropped ${lootList.size} valuable items.")
-
 
         changeStateTo(State.LOOTING)
     }
@@ -300,6 +299,8 @@ class AutoVorkathPlugin : Plugin() {
         lootList.addAll(currentGroundItemIds)
         lootList.retainAll(currentGroundItemIds)
 
+        lootIds.addAll(currentGroundItemIds)
+
         lootList.forEach {
             if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
                 InventoryInteraction.useItem("Shark", "Eat");
@@ -319,34 +320,6 @@ class AutoVorkathPlugin : Plugin() {
                 return
             }
         }
-
-
-
-//        lootQueue.forEach {
-//            if (!TileItems.search().empty()) {
-//
-//                if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
-//                    InventoryInteraction.useItem("Shark", "Eat");
-//                    return
-//                }
-//                //gets stuck on double item drop that stacks to one stack
-//
-//                    if (!Inventory.full()) {
-//                        TileItems.search().withId(it.id).first().ifPresent { item: ETileItem ->
-//                        item.interact(false)
-//
-//                        lootQueue.removeAt(lootQueue.indexOf(it))
-//                    }
-//                    return
-//                } else {
-//                    EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
-//                    EthanApiPlugin.sendClientMessage("could not loot $lootList")
-//                        lootList.clear()
-//                    changeStateTo(State.WALKING_TO_BANK)
-//                    return
-//                }
-//            }
-//        }
     }
 
     private fun acidState() {
@@ -363,7 +336,6 @@ class AutoVorkathPlugin : Plugin() {
 
         fun findSafeTiles(): WorldPoint? {
             val wooxWalkArea = WorldArea(swPoint, 5, 1)
-            //println("Woox Walk Area: ${wooxWalkArea.toWorldPointList()}")
 
             fun isTileSafe(tile: WorldPoint): Boolean = tile !in acidPools
                     && WorldPoint(tile.x, tile.y + 1, tile.plane) !in acidPools
@@ -453,7 +425,7 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
-    var vorkathHpPercent : Int = 100;
+    private var vorkathHpPercent : Int = 100;
     private fun fightingState() {
         if (runIsOff()) enableRun()
         activateProtectPrayer(true)
@@ -464,7 +436,7 @@ class AutoVorkathPlugin : Plugin() {
             changeStateTo(State.THINKING)
             return
         } else {
-            var vorkathNpc: NPC = NPCs.search().nameContains("Vorkath").first().get();
+            val vorkathNpc: NPC = NPCs.search().nameContains("Vorkath").first().get();
             val vorkathLocation = vorkathNpc.worldLocation;
             val middle = WorldPoint(vorkathLocation.x + 3, vorkathLocation.y - 5, 0)
 
@@ -472,7 +444,7 @@ class AutoVorkathPlugin : Plugin() {
                 return Math.round((ratio / scale) * 100f);
             }
             fun updateNpcHp(npc: NPC) {
-                var currentHp: Int = getHpPercentValue(npc.getHealthRatio().toFloat(), npc.getHealthScale().toFloat());
+                val currentHp: Int = getHpPercentValue(npc.getHealthRatio().toFloat(), npc.getHealthScale().toFloat());
 
                 if (currentHp < vorkathHpPercent && currentHp > -1) {
                     vorkathHpPercent = currentHp;
@@ -739,11 +711,11 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun bank() {
-        lootId.forEach { id ->
+        lootIds.forEach { id ->
             if (BankInventory.search().withId(id).result().isNotEmpty()) {
                 BankInventoryInteraction.useItem(id, "Deposit-All")
             } else {
-                lootId.remove(id)
+                lootIds.remove(id)
             }
         }
         if (BankInventory.search().nameContains("Divine ranging potion(1)").result().size > 0) {
@@ -777,14 +749,14 @@ class AutoVorkathPlugin : Plugin() {
         if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
             withdraw(config.ANTIVENOM().toString(), 1)
         }
-        tickDelay = 1
+        tickDelay = 2
         if (!Inventory.full()) {
             for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
                 withdraw(config.FOOD(), 1)
             }
         }
         lootList.clear()
-        lootId.clear()
+        lootIds.clear()
         changeStateTo(State.THINKING)
     }
 
@@ -827,15 +799,6 @@ class AutoVorkathPlugin : Plugin() {
                 return
             }
         }
-    }
-
-    private fun inventoryHasLoot(): Boolean {
-        lootId.forEach { id ->
-            if (Inventory.search().withId(id).result().isNotEmpty()) {
-                return true
-            }
-        }
-        return false
     }
 
     private fun sendKey(key: Int) {
