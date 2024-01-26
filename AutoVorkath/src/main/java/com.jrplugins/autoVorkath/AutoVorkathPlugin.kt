@@ -21,9 +21,11 @@ import net.runelite.api.events.*
 import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.NpcLootReceived
+import net.runelite.client.game.ItemManager
 import net.runelite.client.game.ItemStack
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
+import net.runelite.client.plugins.grounditems.GroundItemsPlugin
 import net.runelite.client.ui.overlay.OverlayManager
 import java.awt.event.KeyEvent
 import javax.inject.Inject
@@ -51,6 +53,9 @@ class AutoVorkathPlugin : Plugin() {
 
     @Inject
     private lateinit var config: AutoVorkathConfig
+
+    @Inject
+    private lateinit var itemManager: ItemManager
 
     @Provides
     fun getConfig(configManager: ConfigManager): AutoVorkathConfig {
@@ -269,8 +274,9 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun testingState() {
-        var item = TileItems.search().nameContains("bolt tips").first()
-        EthanApiPlugin.sendClientMessage("testingState: ${item.get().tileItem.id}")
+        val item = TileItems.search().first().get()
+        val price = itemManager.getItemPrice(item.tileItem.id) * item.tileItem.quantity
+        EthanApiPlugin.sendClientMessage("testingState: ${item.tileItem.id} price: $price")
     }
 
     private fun lootingState() {
