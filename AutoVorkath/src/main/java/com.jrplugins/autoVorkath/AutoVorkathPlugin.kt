@@ -209,6 +209,8 @@ class AutoVorkathPlugin : Plugin() {
         if (e.actor.name == "Vorkath") {
             val vorkath = NPCs.search().nameContains("Vorkath").first().get().worldLocation
             val middle = WorldPoint(vorkath.x + 3, vorkath.y - 5, 0)
+            activateProtectPrayer(false)
+            activateRigour(false)
             if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
                 InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
             }
