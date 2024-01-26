@@ -112,7 +112,7 @@ class AutoVorkathPlugin : Plugin() {
 
     override fun startUp() {
         println("Auto Vorkath Plugin Activated")
-        botState = State.TESTING
+        botState = State.THINKING
         running = client.gameState == GameState.LOGGED_IN
         breakHandler.registerPlugin(this)
         breakHandler.startPlugin(this)
@@ -286,6 +286,7 @@ class AutoVorkathPlugin : Plugin() {
         }
 
         if (event.varbitId == Varbits.SUPER_ANTIFIRE) {
+            drankAntiFire = true
             if (event.value <= 2) {
                 Inventory.search().nameContains("Extended super antifire").first().ifPresent {
                     potion -> InventoryInteraction.useItem(potion, "Drink")
@@ -293,6 +294,7 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
         if (event.varbitId == Varbits.DIVINE_RANGING) {
+            drankRangePotion = true
             if (event.value <= 10) {
                 Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
                     potion -> InventoryInteraction.useItem(potion, "Drink")
@@ -302,13 +304,7 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun testingState() {
-        val currentGroundItemIds = TileItems.search().tileItems.asSequence()
-            .map { it.tileItem }
-//            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE() } //price filter
-            .map { itemManager.getItemPrice(it.id) }
-            .toSet()
 
-        EthanApiPlugin.sendClientMessage("item ids: $currentGroundItemIds")
     }
 
     private fun lootingState() {
@@ -544,6 +540,7 @@ class AutoVorkathPlugin : Plugin() {
         if (runIsOff()) enableRun()
         activateProtectPrayer(false)
         activateRigour(false)
+
         if (!isMoving()) {
             if (bankArea.contains(client.localPlayer.worldLocation)) {
                 if (Widgets.search().withTextContains("Click here to continue").result().isNotEmpty()) {
@@ -560,14 +557,6 @@ class AutoVorkathPlugin : Plugin() {
                 }
             } else {
                 if (inVorkathArea()) {
-                    if (!drankRangePotion) {
-                        Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
-                                potion -> InventoryInteraction.useItem(potion, "Drink")
-                        }
-                        drankRangePotion = true
-                        tickDelay = 2
-                        return
-                    }
                     drankRangePotion = false
                     drankAntiFire = false
                     changeStateTo(State.THINKING, 3)
@@ -578,18 +567,21 @@ class AutoVorkathPlugin : Plugin() {
                         TileObjectInteraction.interact(boat, "Travel")
                     }
                 } else {
-
-                    EthanApiPlugin.sendClientMessage("about to jump rocks, antifire status: $drankAntiFire")
-                    if (!drankAntiFire) {
-                        Inventory.search().nameContains(config.ANTIFIRE().toString()).first().ifPresent {
-                                potion -> InventoryInteraction.useItem(potion, "Drink")
-                            EthanApiPlugin.sendClientMessage("tried to drink antifire")
-                        }
-                        drankAntiFire = true
-                        tickDelay = 2
-                        return
-                    }
                     if (TileObjects.search().withId(31990).result().isNotEmpty()) {
+                        if (!drankAntiFire) {
+                            Inventory.search().nameContains("Extended super antifire").first().ifPresent {
+                                    potion -> InventoryInteraction.useItem(potion, "Drink")
+                            }
+                            tickDelay = 2
+                            return
+                        }
+                        if (!drankRangePotion) {
+                            Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
+                                    potion -> InventoryInteraction.useItem(potion, "Drink")
+                            }
+                            tickDelay = 2
+                            return
+                        }
                         TileObjects.search().withId(31990).first().ifPresent { iceChunk ->
                             TileObjectInteraction.interact(iceChunk, "Climb-over")
                         }
