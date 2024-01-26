@@ -280,7 +280,7 @@ class AutoVorkathPlugin : Plugin() {
     fun onVarbitChanged(event: VarbitChanged) {
         if (event.varbitId == Varbits.SUPER_ANTIFIRE) {
             val superAntiFireVarb = event.value
-            if (superAntiFireVarb <= 1) {
+            if (superAntiFireVarb <= 2) {
                 Inventory.search().nameContains("Extended super antifire").first().ifPresent {
                     potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
@@ -288,7 +288,7 @@ class AutoVorkathPlugin : Plugin() {
         }
         if (event.varbitId == Varbits.DIVINE_RANGING) {
             val rangePotVarb = event.value
-            if (rangePotVarb <= 1) {
+            if (rangePotVarb <= 10) {
                 Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
                     potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
@@ -509,6 +509,20 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun pokeState() {
+        if (!drankAntiFire) {
+            Inventory.search().nameContains("Extended super antifire").first().ifPresent {
+                potion -> InventoryInteraction.useItem(potion, "Drink")
+            }
+            drankAntiFire = true
+            tickDelay = 1
+        }
+        if (!drankRangePotion) {
+            Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
+                potion -> InventoryInteraction.useItem(potion, "Drink")
+            }
+            drankRangePotion = true
+            tickDelay = 1
+        }
         if (isVorkathAsleep()) {
             acidPools.clear()
             if (!isMoving()) {
@@ -521,6 +535,8 @@ class AutoVorkathPlugin : Plugin() {
             val middle = WorldPoint(vorkath.x + 3, vorkath.y - 5, 0)
             MousePackets.queueClickPacket()
             MovementPackets.queueMovement(middle)
+            drankAntiFire = false
+            drankRangePotion = false
             changeStateTo(State.FIGHTING)
             return
         }
