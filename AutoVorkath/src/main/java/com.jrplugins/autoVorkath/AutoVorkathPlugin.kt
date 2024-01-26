@@ -100,7 +100,6 @@ class AutoVorkathPlugin : Plugin() {
         WALKING_TO_BANK,
         BANKING,
         WALKING_TO_VORKATH,
-        PREPARE,
         POKE,
         FIGHTING,
         ACID,
@@ -262,7 +261,6 @@ class AutoVorkathPlugin : Plugin() {
                 State.WALKING_TO_BANK -> walkingToBankState()
                 State.BANKING -> bankingState()
                 State.WALKING_TO_VORKATH -> walkingToVorkathState()
-                State.PREPARE -> prepareState()
                 State.POKE -> pokeState()
                 State.FIGHTING -> fightingState()
                 State.ACID -> acidState()
@@ -278,17 +276,22 @@ class AutoVorkathPlugin : Plugin() {
 
     @Subscribe
     fun onVarbitChanged(event: VarbitChanged) {
+
+        if (event.varbitId == VarPlayer.POISON) {
+                Inventory.search().nameContains("Anti-venom").first().ifPresent { potion ->
+                    InventoryInteraction.useItem(potion, "Drink")
+                }
+        }
+
         if (event.varbitId == Varbits.SUPER_ANTIFIRE) {
-            val superAntiFireVarb = event.value
-            if (superAntiFireVarb <= 2) {
+            if (event.value <= 2) {
                 Inventory.search().nameContains("Extended super antifire").first().ifPresent {
                     potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
             }
         }
         if (event.varbitId == Varbits.DIVINE_RANGING) {
-            val rangePotVarb = event.value
-            if (rangePotVarb <= 10) {
+            if (event.value <= 10) {
                 Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
                     potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
@@ -509,20 +512,6 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun pokeState() {
-        if (!drankAntiFire) {
-            Inventory.search().nameContains("Extended super antifire").first().ifPresent {
-                potion -> InventoryInteraction.useItem(potion, "Drink")
-            }
-            drankAntiFire = true
-            tickDelay = 1
-        }
-        if (!drankRangePotion) {
-            Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
-                potion -> InventoryInteraction.useItem(potion, "Drink")
-            }
-            drankRangePotion = true
-            tickDelay = 1
-        }
         if (isVorkathAsleep()) {
             acidPools.clear()
             if (!isMoving()) {
@@ -535,8 +524,6 @@ class AutoVorkathPlugin : Plugin() {
             val middle = WorldPoint(vorkath.x + 3, vorkath.y - 5, 0)
             MousePackets.queueClickPacket()
             MovementPackets.queueMovement(middle)
-            drankAntiFire = false
-            drankRangePotion = false
             changeStateTo(State.FIGHTING)
             return
         }
@@ -562,6 +549,24 @@ class AutoVorkathPlugin : Plugin() {
                 }
             } else {
                 if (inVorkathArea()) {
+                    if (!drankAntiFire) {
+                        Inventory.search().nameContains("Extended super antifire").first().ifPresent {
+                                potion -> InventoryInteraction.useItem(potion, "Drink")
+                        }
+                        drankAntiFire = true
+                        tickDelay = 2
+                        return
+                    }
+                    if (!drankRangePotion) {
+                        Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
+                                potion -> InventoryInteraction.useItem(potion, "Drink")
+                        }
+                        drankRangePotion = true
+                        tickDelay = 2
+                        return
+                    }
+                    drankRangePotion = false
+                    drankAntiFire = false
                     changeStateTo(State.THINKING, 3)
                     return
                 }
@@ -648,22 +653,13 @@ class AutoVorkathPlugin : Plugin() {
     private fun thinkingState() {
         if (readyToFight()) { // Check if player has all potions and food
             if (inVorkathArea()) { // Check if player in Vorkath area
-                if (isPrepared) { // Has drank potions
                     changeStateTo(State.POKE)
                     return
-                } else { // Hasn't drank potions
-                    changeStateTo(State.PREPARE) // Drink potions
-                    return
-                }
             } else { // walk to vorkath
                 changeStateTo(State.WALKING_TO_VORKATH)
                 return
             }
         } else { // If player doesn't have all potions and food
-            drankRangePotion = false
-            drankAntiFire = false
-            drankAntiVenom = false
-            isPrepared = false
             if (bankArea.contains(client.localPlayer.worldLocation)) { // Player is in bank area
                 changeStateTo(State.BANKING)
                 return
@@ -671,36 +667,6 @@ class AutoVorkathPlugin : Plugin() {
                 changeStateTo(State.WALKING_TO_BANK)
                 return
             }
-        }
-    }
-
-    private fun prepareState() {
-        val currentTime = System.currentTimeMillis()
-
-        val antiVenomPotion = Inventory.search().nameContains(config.ANTIVENOM().toString()).first()
-
-        if (!drankAntiVenom && currentTime - lastDrankAntiVenom > config.ANTIVENOM().time() && antiVenomPotion.isPresent) {
-            antiVenomPotion.ifPresent { potion ->
-                InventoryInteraction.useItem(potion, "Drink")
-                lastDrankAntiVenom = System.currentTimeMillis()
-                drankAntiVenom = true
-                tickDelay = 2
-            }
-            return
-        }
-
-        tickDelay = 1
-
-        isPrepared = drankAntiVenom
-        if (isPrepared) {
-            changeStateTo(State.THINKING)
-            return
-        } else {
-            changeStateTo(State.WALKING_TO_BANK)
-            EthanApiPlugin.sendClientMessage(" isPrepared: $isPrepared")
-            EthanApiPlugin.sendClientMessage(" drankAntiVenom: $drankAntiVenom")
-            EthanApiPlugin.sendClientMessage("Not prepared. Banking.")
-            return
         }
     }
 
