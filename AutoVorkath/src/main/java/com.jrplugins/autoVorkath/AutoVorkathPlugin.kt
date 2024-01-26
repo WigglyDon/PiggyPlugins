@@ -649,7 +649,7 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem(potion, "Drink")
                 lastDrankRangePotion = System.currentTimeMillis()
                 drankRangePotion = true
-                tickDelay = 3
+                tickDelay = 2
             }
             return
         }
