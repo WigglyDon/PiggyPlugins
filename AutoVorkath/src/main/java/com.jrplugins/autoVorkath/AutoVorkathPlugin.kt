@@ -275,6 +275,19 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
+    @Subscribe
+    fun onVarbitChanged(event: VarbitChanged) {
+        if (event.varbitId == Varbits.SUPER_ANTIFIRE) {
+            val superAntiFireVarb = event.value
+            EthanApiPlugin.sendClientMessage("antifire varbit: $superAntiFireVarb")
+            if (superAntiFireVarb <= 1) {
+                Inventory.search().nameContains("Extended super antifire").first().ifPresent {
+                    antifire -> InventoryInteraction.useItem(antifire, "Drink")
+                }
+            }
+        }
+    }
+
     private fun testingState() {    }
 
     private fun lootingState() {
@@ -453,7 +466,6 @@ class AutoVorkathPlugin : Plugin() {
                     vorkathHpPercent = 100;
                 }
             }
-
             updateNpcHp(vorkathNpc);
 
             if (vorkathHpPercent <= 35 && vorkathHpPercent > 0) {
@@ -641,7 +653,6 @@ class AutoVorkathPlugin : Plugin() {
     private fun prepareState() {
         val currentTime = System.currentTimeMillis()
         val rangePotion = Inventory.search().nameContains(config.RANGEPOTION().toString()).first()
-        val antiFirePotion = Inventory.search().nameContains(config.ANTIFIRE().toString()).first()
         val antiVenomPotion = Inventory.search().nameContains(config.ANTIVENOM().toString()).first()
 
         if (!drankRangePotion && currentTime - lastDrankRangePotion > config.RANGEPOTION().time() && rangePotion.isPresent) {
@@ -649,15 +660,6 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem(potion, "Drink")
                 lastDrankRangePotion = System.currentTimeMillis()
                 drankRangePotion = true
-                tickDelay = 2
-            }
-            return
-        }
-        if (!drankAntiFire && currentTime - lastDrankAntiFire > config.ANTIFIRE().time() && antiFirePotion.isPresent) {
-            antiFirePotion.ifPresent { potion ->
-                InventoryInteraction.useItem(potion, "Drink")
-                lastDrankAntiFire = System.currentTimeMillis()
-                drankAntiFire = true
                 tickDelay = 2
             }
             return
@@ -674,14 +676,13 @@ class AutoVorkathPlugin : Plugin() {
 
         tickDelay = 1
 
-        isPrepared = drankAntiFire && drankRangePotion && drankAntiVenom
+        isPrepared = drankRangePotion && drankAntiVenom
         if (isPrepared) {
             changeStateTo(State.THINKING)
             return
         } else {
             changeStateTo(State.WALKING_TO_BANK)
             EthanApiPlugin.sendClientMessage(" isPrepared: $isPrepared")
-            EthanApiPlugin.sendClientMessage(" drankAntiFire: $drankAntiFire")
             EthanApiPlugin.sendClientMessage(" drankRangePotion: $drankRangePotion")
             EthanApiPlugin.sendClientMessage(" drankAntiVenom: $drankAntiVenom")
             EthanApiPlugin.sendClientMessage("Not prepared. Banking.")
