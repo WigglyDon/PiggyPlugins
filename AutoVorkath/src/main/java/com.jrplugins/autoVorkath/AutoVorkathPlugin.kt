@@ -500,6 +500,11 @@ class AutoVorkathPlugin : Plugin() {
                 }
             }
 
+            if (vorkathHpPercent == 0) {
+                activateProtectPrayer(false)
+                activateRigour(false)
+            }
+
             if (client.localPlayer.interacting == null) {
                 NPCs.search().nameContains("Vorkath").first().ifPresent { vorkath ->
                     NPCInteraction.interact(vorkath, "Attack")
