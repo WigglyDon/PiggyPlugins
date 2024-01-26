@@ -150,9 +150,9 @@ public interface AutoVorkathConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "price",
-            name = "Price",
-            description = "Minimum loot price",
+            keyName = "minimum loot value",
+            name = "Minimum loot value",
+            description = "Minimum loot value",
             position = 14
     )
     default int MIN_PRICE() { return 0; }
