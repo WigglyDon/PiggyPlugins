@@ -112,7 +112,7 @@ class AutoVorkathPlugin : Plugin() {
 
     override fun startUp() {
         println("Auto Vorkath Plugin Activated")
-        botState = State.THINKING
+        botState = State.TESTING
         running = client.gameState == GameState.LOGGED_IN
         breakHandler.registerPlugin(this)
         breakHandler.startPlugin(this)
@@ -301,7 +301,15 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
-    private fun testingState() {    }
+    private fun testingState() {
+        val currentGroundItemIds = TileItems.search().tileItems.asSequence()
+            .map { it.tileItem }
+//            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE() } //price filter
+            .map { itemManager.getItemPrice(it.id) }
+            .toSet()
+
+        EthanApiPlugin.sendClientMessage("item ids: $currentGroundItemIds")
+    }
 
     private fun lootingState() {
         if (lootList.isEmpty() || TileItems.search().empty()) {
@@ -318,7 +326,8 @@ class AutoVorkathPlugin : Plugin() {
 
         val currentGroundItemIds = TileItems.search().tileItems.asSequence()
             .map { it.tileItem }
-            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE() } //price filter
+            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE()
+                    || itemManager.getItemPrice(it.id) == 0}
             .map { it.id }
             .toSet()
 
@@ -569,9 +578,12 @@ class AutoVorkathPlugin : Plugin() {
                         TileObjectInteraction.interact(boat, "Travel")
                     }
                 } else {
+
+                    EthanApiPlugin.sendClientMessage("about to jump rocks, antifire status: $drankAntiFire")
                     if (!drankAntiFire) {
-                        Inventory.search().nameContains("Extended super antifire").first().ifPresent {
+                        Inventory.search().nameContains(config.ANTIFIRE().toString()).first().ifPresent {
                                 potion -> InventoryInteraction.useItem(potion, "Drink")
+                            EthanApiPlugin.sendClientMessage("tried to drink antifire")
                         }
                         drankAntiFire = true
                         tickDelay = 2
@@ -582,7 +594,7 @@ class AutoVorkathPlugin : Plugin() {
                             TileObjectInteraction.interact(iceChunk, "Climb-over")
                         }
                     } else {
-                        EthanApiPlugin.sendClientMessage("FAIL IN WALKINGTOVORKATHSTATE")
+                        EthanApiPlugin.sendClientMessage("WALKING_TO_VORKATH -> -> WALKING_TO_BANK")
                         changeStateTo(State.WALKING_TO_BANK)
                     }
                 }
