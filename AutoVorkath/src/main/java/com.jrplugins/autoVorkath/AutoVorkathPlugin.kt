@@ -208,7 +208,7 @@ class AutoVorkathPlugin : Plugin() {
         }
         if (e.actor.name == "Vorkath") {
             val vorkath = NPCs.search().nameContains("Vorkath").first().get().worldLocation
-            val middle = WorldPoint(vorkath.x + 3, vorkath.y, 0)
+            val middle = WorldPoint(vorkath.x + 3, vorkath.y - 1, 0)
             activateProtectPrayer(false)
             activateRigour(false)
             if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
@@ -462,8 +462,8 @@ class AutoVorkathPlugin : Plugin() {
     private var vorkathHpPercent : Int = 100;
     private fun fightingState() {
         if (runIsOff()) enableRun()
-        activateProtectPrayer(true)
-        activateRigour(true)
+        activateProtectPrayer(vorkathHpPercent != 0)
+        activateRigour(vorkathHpPercent != 0)
         acidPools.clear()
         if (!inVorkathArea()) {
             EthanApiPlugin.sendClientMessage("FIGHTING state change to THINKING")
@@ -498,11 +498,6 @@ class AutoVorkathPlugin : Plugin() {
                 if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
                     InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
                 }
-            }
-
-            if (vorkathHpPercent == 0) {
-                activateProtectPrayer(false)
-                activateRigour(false)
             }
 
             if (client.localPlayer.interacting == null) {
