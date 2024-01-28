@@ -312,12 +312,12 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun lootingState() {
         if (lootList.isEmpty() || TileItems.search().empty()) {
-            if (Inventory.getItemAmount(config.FOOD()) < config.FOODAMOUNT().height) {
+            if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height) {
                 EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
             }
-            if (Inventory.getItemAmount(config.FOOD()) >= config.FOODAMOUNT().height) {
+            if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) >= config.FOODAMOUNT().height) {
                 changeStateTo(State.THINKING, 1)
                 return
             }
@@ -336,8 +336,8 @@ class AutoVorkathPlugin : Plugin() {
         lootIds.addAll(currentGroundItemIds)
 
         lootList.forEach {
-            if (Inventory.full() && Inventory.getItemAmount(config.FOOD()) > 0) {
-                InventoryInteraction.useItem(config.FOOD()  , "Eat");
+            if (Inventory.full() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
+                InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat");
                 return
             }
 
@@ -696,8 +696,6 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
-    private var bankingStep = 0
-
     private fun bank() {
         lootIds.forEach { id ->
             if (BankInventory.search().withId(id).result().isNotEmpty()) {
@@ -708,12 +706,18 @@ class AutoVorkathPlugin : Plugin() {
         }
         if (BankInventory.search().nameContains("Divine ranging potion(1)").result().size > 0) {
             BankInventoryInteraction.useItem("Divine ranging potion(1)", "Deposit-All")
+            changeStateTo(State.THINKING, 1)
+            return
         }
         if (BankInventory.search().nameContains("Extended super antifire(1)").result().size > 0) {
             BankInventoryInteraction.useItem("Extended super antifire(1)", "Deposit-All")
+            changeStateTo(State.THINKING, 1)
+            return
         }
         if (BankInventory.search().nameContains("Anti-venom+(1)").result().size > 0) {
             BankInventoryInteraction.useItem("Anti-venom+(1)", "Deposit-All")
+            changeStateTo(State.THINKING, 1)
+            return
         }
 
         if (!hasItem(config.TELEPORT().toString())) {
@@ -743,8 +747,8 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
         if (!Inventory.full()) {
-            for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
-                withdraw(config.FOOD(), 1)
+            for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD_TYPE().foodId)) {
+                withdrawId(config.FOOD_TYPE().foodId, 1)
             }
         }
         lootList.clear()
@@ -761,7 +765,7 @@ class AutoVorkathPlugin : Plugin() {
     private fun isMoving(): Boolean = EthanApiPlugin.isMoving() || client.localPlayer.animation != -1
     private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= config.PRAYERAT();
     private fun readyToFight(): Boolean =
-        (Inventory.search().nameContains(config.FOOD()).result().size >= config.FOODAMOUNT().height
+        (Inventory.search().withId(config.FOOD_TYPE().foodId).result().size >= config.FOODAMOUNT().height
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains(config.TELEPORT().toString()).result().isNotEmpty()
                 && Inventory.search().nameContains("Rune pouch").result().isNotEmpty()
@@ -812,6 +816,12 @@ class AutoVorkathPlugin : Plugin() {
     fun hasItem(name: String): Boolean = Inventory.search().nameContains(name).result().isNotEmpty()
     fun withdraw(name: String, amount: Int) {
         Bank.search().nameContains(name).first().ifPresent { item ->
+            BankInteraction.withdrawX(item, amount)
+        }
+    }
+
+    fun withdrawId(id: Int, amount: Int) {
+        Bank.search().withId(id).first().ifPresent { item ->
             BankInteraction.withdrawX(item, amount)
         }
     }

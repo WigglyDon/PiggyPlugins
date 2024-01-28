@@ -128,7 +128,7 @@ public interface AutoVorkathConfig extends Config {
             position = 11
     )
     default int EATAT() {
-        return 75;
+        return 50;
     }
 
     @ConfigItem(
@@ -142,11 +142,11 @@ public interface AutoVorkathConfig extends Config {
     @ConfigItem(
             keyName = "food",
             name = "Food",
-            description = "What food to use? (NOT MANTA RAY!)",
+            description = "What food to use?",
             position = 13
     )
-    default String FOOD() {
-        return "Shark";
+    default FOOD_TYPE FOOD_TYPE() {
+        return FOOD_TYPE.MANTA_RAY;
     }
 
     @ConfigItem(
