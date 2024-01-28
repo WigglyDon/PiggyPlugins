@@ -312,12 +312,12 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun lootingState() {
         if (lootList.isEmpty() || TileItems.search().empty()) {
-            if (Inventory.getItemAmount("Shark") < 6) {
+            if (Inventory.getItemAmount(config.FOOD()) < config.FOODAMOUNT().height) {
                 EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
             }
-            if (Inventory.getItemAmount("Shark") >= 6) {
+            if (Inventory.getItemAmount(config.FOOD()) >= config.FOODAMOUNT().height) {
                 changeStateTo(State.THINKING, 1)
                 return
             }
@@ -336,8 +336,8 @@ class AutoVorkathPlugin : Plugin() {
         lootIds.addAll(currentGroundItemIds)
 
         lootList.forEach {
-            if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
-                InventoryInteraction.useItem("Shark", "Eat");
+            if (Inventory.full() && Inventory.getItemAmount(config.FOOD()) > 0) {
+                InventoryInteraction.useItem(config.FOOD()  , "Eat");
                 return
             }
 
@@ -724,9 +724,6 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < 3    ) {
-            withdraw(config.PRAYERPOTION().toString(), 1)
-        }
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)
         }
@@ -739,7 +736,11 @@ class AutoVorkathPlugin : Plugin() {
         if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
             withdraw(config.ANTIVENOM().toString(), 1)
         }
-        tickDelay = 2
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < config.PRAYER_POTION_AMOUNT()) {
+            for (i in 1..config.PRAYER_POTION_AMOUNT() - Inventory.getItemAmount(config.PRAYERPOTION().toString())) {
+            withdraw(config.PRAYERPOTION().toString(), 1)
+            }
+        }
         if (!Inventory.full()) {
             for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
                 withdraw(config.FOOD(), 1)
