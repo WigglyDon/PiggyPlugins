@@ -724,8 +724,9 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < 3    ) {
-            withdraw(config.PRAYERPOTION().toString(), 1)
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < config.PRAYER_POTION_AMOUNT() ) {
+            withdraw(config.PRAYERPOTION().toString(),
+                config.PRAYER_POTION_AMOUNT() - BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size)
         }
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)

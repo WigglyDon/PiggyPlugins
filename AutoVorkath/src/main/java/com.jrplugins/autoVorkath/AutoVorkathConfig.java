@@ -157,4 +157,12 @@ public interface AutoVorkathConfig extends Config {
     )
     default int MIN_PRICE() { return 0; }
 
+    @ConfigItem(
+            keyName = "prayer pots to bring",
+            name = "Prayer pots to bring",
+            description = "# of ppots to bring",
+            position = 15
+    )
+    default int PRAYER_POTION_AMOUNT() { return 3; }
+
 }
