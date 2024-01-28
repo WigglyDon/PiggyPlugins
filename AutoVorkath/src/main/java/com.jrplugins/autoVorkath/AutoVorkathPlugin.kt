@@ -232,8 +232,8 @@ class AutoVorkathPlugin : Plugin() {
             whiteProjectileId -> changeStateTo(State.SPAWN)
             acidRedProjectileId -> changeStateTo(State.ACID)
             rangeProjectileId, magicProjectileId, purpleProjectileId, blueProjectileId -> {
-                activateProtectPrayer(true)
-                activateRigour(true)
+                activateProtectPrayer(vorkathHpPercent != 0)
+                activateRigour(vorkathHpPercent != 0)
             }
             redProjectileId -> {
                 redBallLocation = WorldPoint.fromLocal(client, e.position)
@@ -317,7 +317,7 @@ class AutoVorkathPlugin : Plugin() {
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
             }
-            if (Inventory.getItemAmount("Shark") >= 6) {
+            else {
                 changeStateTo(State.THINKING, 1)
                 return
             }
