@@ -606,22 +606,18 @@ class AutoVorkathPlugin : Plugin() {
                     if (client.localPlayer.worldLocation != bankLocation) {
                         MousePackets.queueClickPacket()
                         MovementPackets.queueMovement(bankLocation)
-                        return
                     } else {
                         NPCs.search().nameContains("Jack").nearestToPlayer().ifPresent { bank ->
                             NPCInteraction.interact(bank, "Bank")
                         }
                         tickDelay = 3
-                        return
                     }
                 } else {
                     bank()
-                    return
                 }
             }
         } else {
             changeStateTo(State.THINKING)
-            return
         }
     }
 
@@ -700,6 +696,8 @@ class AutoVorkathPlugin : Plugin() {
         }
     }
 
+    private var bankingStep = 0
+
     private fun bank() {
         lootIds.forEach { id ->
             if (BankInventory.search().withId(id).result().isNotEmpty()) {
@@ -736,9 +734,12 @@ class AutoVorkathPlugin : Plugin() {
         if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
             withdraw(config.ANTIVENOM().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < config.PRAYER_POTION_AMOUNT()) {
-            for (i in 1..config.PRAYER_POTION_AMOUNT() - Inventory.getItemAmount(config.PRAYERPOTION().toString())) {
-            withdraw(config.PRAYERPOTION().toString(), 1)
+
+        val prayerPotionsInInventory = BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size
+
+        if (prayerPotionsInInventory < config.PRAYER_POTION_AMOUNT()) {
+            for (i in 1..config.PRAYER_POTION_AMOUNT() - prayerPotionsInInventory) {
+                withdraw(config.PRAYERPOTION().toString(), 1)
             }
         }
         if (!Inventory.full()) {
