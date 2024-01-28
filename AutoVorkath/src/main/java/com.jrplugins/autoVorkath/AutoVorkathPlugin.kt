@@ -311,13 +311,14 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun lootingState() {
-        var notEnoughFood = false  // Flag to track if there's not enough food
+        var notEnoughFood = false
 
         if (lootList.isEmpty() || TileItems.search().empty()) {
             if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height) {
-                notEnoughFood = true  // Set the flag if there's not enough food
+                notEnoughFood = true
             }
             if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) >= config.FOODAMOUNT().height) {
+                EthanApiPlugin.sendClientMessage("THINKING NUMBER 0!")
                 changeStateTo(State.THINKING, 1)
                 return
             }
@@ -339,12 +340,25 @@ class AutoVorkathPlugin : Plugin() {
         var lootedAnyItem = false
 
         for (itemId in lootList) {
+
+            if (!Inventory.full()) {
+                TileItems.search().withId(itemId).first().ifPresent { item: ETileItem ->
+                    item.interact(false)
+                    lootIds.add(itemId)
+                    lootedAnyItem = true
+                }
+            }
+
             if (Inventory.full()) {
                 if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
                     InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat")
-                    // Continue looting if there are more items to loot
                     if (lootList.indexOf(itemId) < lootList.size - 1) {
                         continue
+                    }
+                    else {
+                        if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height) {
+                            notEnoughFood = true
+                        }
                     }
                 } else {
                     if (lootedAnyItem) {
@@ -352,28 +366,20 @@ class AutoVorkathPlugin : Plugin() {
                         changeStateTo(State.WALKING_TO_BANK)
                         return
                     } else {
-                        // No items looted, and no food, change to THINKING
                         changeStateTo(State.THINKING)
                         return
                     }
                 }
             }
-
-            TileItems.search().withId(itemId).first().ifPresent { item: ETileItem ->
-                item.interact(false)
-                lootIds.add(itemId)
-                lootedAnyItem = true
-            }
         }
 
-        if (notEnoughFood) {
-            // If there's not enough food, change to WALKING_TO_BANK
+        if (lootList.isEmpty() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height || notEnoughFood) {
             EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!")
             changeStateTo(State.WALKING_TO_BANK, 1)
             return
         }
 
-        if (!lootedAnyItem) {
+        if (lootList.isEmpty()) {
             changeStateTo(State.THINKING)
         }
     }
