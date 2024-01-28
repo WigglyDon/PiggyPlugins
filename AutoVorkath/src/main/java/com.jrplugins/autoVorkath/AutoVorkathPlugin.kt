@@ -338,13 +338,19 @@ class AutoVorkathPlugin : Plugin() {
         lootList.clear()
         lootList.addAll(sortedGroundItems.toSet())
 
-        var itemInteracted = false
-
         for (itemId in lootList) {
             if (Inventory.full()) {
                 if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
                     InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat")
-                    continue  // Continue looting after making space
+                    // After eating, check if there's now space to continue looting
+                    if (!Inventory.full()) {
+                        continue  // If there's space after eating, continue looting
+                    } else {
+                        // If still full after eating, go to bank
+                        EthanApiPlugin.sendClientMessage("Inventory still full after eating, going to bank.")
+                        changeStateTo(State.WALKING_TO_BANK)
+                        return
+                    }
                 } else {
                     EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
                     EthanApiPlugin.sendClientMessage("could not loot $lootList")
@@ -357,16 +363,11 @@ class AutoVorkathPlugin : Plugin() {
             if (item != null) {
                 item.interact(false)
                 lootIds.add(itemId) // Add item to lootIds when successfully interacted
-                itemInteracted = true
-                break  // Break out of the loop after interacting with an item
+                // Continue checking for more items after successful interaction
             }
         }
 
-        if (itemInteracted) {
-            return  // Return from the function if an item was interacted with
-        }
-
-        // If no items were interacted with, change state to THINKING
+        // If reached this point, change state to THINKING
         changeStateTo(State.THINKING)
     }
 
