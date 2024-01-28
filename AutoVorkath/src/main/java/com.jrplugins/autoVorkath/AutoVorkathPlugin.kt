@@ -194,7 +194,7 @@ class AutoVorkathPlugin : Plugin() {
                 changeStateTo(State.LOOTING)
             }
             else {
-            changeStateTo(State.FIGHTING)
+                changeStateTo(State.FIGHTING)
             }
         }
     }
@@ -215,8 +215,8 @@ class AutoVorkathPlugin : Plugin() {
                 InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
             }
             if (client.localPlayer.worldLocation != middle) {
-                    MousePackets.queueClickPacket()
-                    MovementPackets.queueMovement(middle)
+                MousePackets.queueClickPacket()
+                MovementPackets.queueMovement(middle)
             }
         }
     }
@@ -232,8 +232,8 @@ class AutoVorkathPlugin : Plugin() {
             whiteProjectileId -> changeStateTo(State.SPAWN)
             acidRedProjectileId -> changeStateTo(State.ACID)
             rangeProjectileId, magicProjectileId, purpleProjectileId, blueProjectileId -> {
-                activateProtectPrayer(vorkathHpPercent != 0)
-                activateRigour(vorkathHpPercent != 0)
+                activateProtectPrayer(true)
+                activateRigour(true)
             }
             redProjectileId -> {
                 redBallLocation = WorldPoint.fromLocal(client, e.position)
@@ -292,7 +292,7 @@ class AutoVorkathPlugin : Plugin() {
             drankAntiFire = true
             if (event.value <= 2) {
                 Inventory.search().nameContains("Extended super antifire").first().ifPresent {
-                    potion -> InventoryInteraction.useItem(potion, "Drink")
+                        potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
             }
         }
@@ -300,7 +300,7 @@ class AutoVorkathPlugin : Plugin() {
             drankRangePotion = true
             if (event.value <= 10) {
                 Inventory.search().nameContains("Divine ranging potion").first().ifPresent {
-                    potion -> InventoryInteraction.useItem(potion, "Drink")
+                        potion -> InventoryInteraction.useItem(potion, "Drink")
                 }
             }
         }
@@ -312,12 +312,12 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun lootingState() {
         if (lootList.isEmpty() || TileItems.search().empty()) {
-            if (Inventory.getItemAmount(config.FOOD()) < config.FOODAMOUNT().height) {
+            if (Inventory.getItemAmount("Shark") < 6) {
                 EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
             }
-            else {
+            if (Inventory.getItemAmount("Shark") >= 6) {
                 changeStateTo(State.THINKING, 1)
                 return
             }
@@ -336,8 +336,8 @@ class AutoVorkathPlugin : Plugin() {
         lootIds.addAll(currentGroundItemIds)
 
         lootList.forEach {
-            if (Inventory.full() && Inventory.getItemAmount(config.FOOD()) > 0) {
-                InventoryInteraction.useItem(config.FOOD(), "Eat");
+            if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
+                InventoryInteraction.useItem("Shark", "Eat");
                 return
             }
 
@@ -555,7 +555,7 @@ class AutoVorkathPlugin : Plugin() {
                     MovementPackets.queueMovement(bankLocation)
                 } else {
                     NPCs.search().nameContains("Sirsal Banker").nearestToPlayer().ifPresent { banker ->
-                        NPCInteraction.interact(banker, "Bank")
+                        NPCInteraction.interact(banker, "Talk-to")
                     }
                 }
             } else {
@@ -724,6 +724,9 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < 3    ) {
+            withdraw(config.PRAYERPOTION().toString(), 1)
+        }
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)
         }
@@ -736,14 +739,12 @@ class AutoVorkathPlugin : Plugin() {
         if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
             withdraw(config.ANTIVENOM().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < config.PRAYER_POTION_AMOUNT() ) {
-            withdraw(config.PRAYERPOTION().toString(),
-                config.PRAYER_POTION_AMOUNT() - BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size)
-        }
-        if (!Inventory.full()) {
-            withdraw(config.FOOD().toString(), 100)
-        }
         tickDelay = 2
+        if (!Inventory.full()) {
+            for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
+                withdraw(config.FOOD(), 1)
+            }
+        }
         lootList.clear()
         lootIds.clear()
         changeStateTo(State.THINKING)
