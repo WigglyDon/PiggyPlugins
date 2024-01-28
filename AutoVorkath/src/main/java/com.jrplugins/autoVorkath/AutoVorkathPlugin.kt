@@ -313,7 +313,7 @@ class AutoVorkathPlugin : Plugin() {
     private fun lootingState() {
         if (lootList.isEmpty() || TileItems.search().empty()) {
             if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height) {
-                EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
+                EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!")
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
             }
@@ -323,26 +323,33 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
 
-        val currentGroundItemIds = TileItems.search().tileItems.asSequence()
+        // Step 1: Create a list of item IDs along with their total value
+        val currentGroundItems = TileItems.search().tileItems.asSequence()
             .map { it.tileItem }
-            .filter { itemManager.getItemPrice(it.id) * it.quantity > config.MIN_PRICE()
-                    || itemManager.getItemPrice(it.id) == 0}
-            .map { it.id }
-            .toSet()
+            .map { it to itemManager.getItemPrice(it.id) * it.quantity }
+            .filter { (item, value) -> value > config.MIN_PRICE() || itemManager.getItemPrice(item.id) == 0 }
+            .toList()
 
-        lootList.addAll(currentGroundItemIds)
-        lootList.retainAll(currentGroundItemIds)
+        // Step 2: Sort the list in descending order of value
+        val sortedGroundItems = currentGroundItems.sortedByDescending { (_, value) -> value }
+            .map { it.first.id } // Extract the sorted item IDs
 
-        lootIds.addAll(currentGroundItemIds)
+        // Step 3: Convert the sorted item IDs to a Set
+        val sortedItemIdsSet = sortedGroundItems.toSet()
 
-        lootList.forEach {
+        // Step 4: Update lootList and lootIds using the sorted Set
+        lootList.addAll(sortedItemIdsSet)
+        lootList.retainAll(sortedItemIdsSet)
+        lootIds.addAll(sortedItemIdsSet)
+
+        lootList.forEach { itemId ->
             if (Inventory.full() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
-                InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat");
+                InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat")
                 return
             }
 
             if (!Inventory.full()) {
-                TileItems.search().withId(it).first().ifPresent { item: ETileItem ->
+                TileItems.search().withId(itemId).first().ifPresent { item: ETileItem ->
                     item.interact(false)
                 }
                 return
@@ -704,19 +711,19 @@ class AutoVorkathPlugin : Plugin() {
                 lootIds.remove(id)
             }
         }
-        if (BankInventory.search().nameContains("Divine ranging potion(1)").result().size > 0) {
-            BankInventoryInteraction.useItem("Divine ranging potion(1)", "Deposit-All")
-            changeStateTo(State.THINKING, 1)
-            return
+
+        val itemsToDeposit = listOf("Divine ranging potion(1)", "Extended super antifire(1)", "Anti-venom+(1)", "Prayer potion(1)")
+        var itemDeposited = false
+
+        for (item in itemsToDeposit) {
+            if (BankInventory.search().nameContains(item).result().size > 0) {
+                BankInventoryInteraction.useItem(item, "Deposit-All")
+                itemDeposited = true
+            }
         }
-        if (BankInventory.search().nameContains("Extended super antifire(1)").result().size > 0) {
-            BankInventoryInteraction.useItem("Extended super antifire(1)", "Deposit-All")
-            changeStateTo(State.THINKING, 1)
-            return
-        }
-        if (BankInventory.search().nameContains("Anti-venom+(1)").result().size > 0) {
-            BankInventoryInteraction.useItem("Anti-venom+(1)", "Deposit-All")
-            changeStateTo(State.THINKING, 1)
+
+        if (itemDeposited) {
+            changeStateTo(State.THINKING)
             return
         }
 
