@@ -312,7 +312,7 @@ class AutoVorkathPlugin : Plugin() {
 
     private fun lootingState() {
         if (lootList.isEmpty() || TileItems.search().empty()) {
-            if (Inventory.getItemAmount("Shark") < 6) {
+            if (Inventory.getItemAmount(config.FOOD()) < config.FOODAMOUNT().height) {
                 EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!");
                 changeStateTo(State.WALKING_TO_BANK, 1)
                 return
