@@ -336,8 +336,8 @@ class AutoVorkathPlugin : Plugin() {
         lootIds.addAll(currentGroundItemIds)
 
         lootList.forEach {
-            if (Inventory.full() && Inventory.getItemAmount("Shark") > 0) {
-                InventoryInteraction.useItem("Shark", "Eat");
+            if (Inventory.full() && Inventory.getItemAmount(config.FOOD()) > 0) {
+                InventoryInteraction.useItem(config.FOOD(), "Eat");
                 return
             }
 
@@ -555,7 +555,7 @@ class AutoVorkathPlugin : Plugin() {
                     MovementPackets.queueMovement(bankLocation)
                 } else {
                     NPCs.search().nameContains("Sirsal Banker").nearestToPlayer().ifPresent { banker ->
-                        NPCInteraction.interact(banker, "Talk-to")
+                        NPCInteraction.interact(banker, "Bank")
                     }
                 }
             } else {
@@ -724,10 +724,6 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem(config.SLAYERSTAFF().toString())) {
             withdraw(config.SLAYERSTAFF().toString(), 1)
         }
-        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < config.PRAYER_POTION_AMOUNT() ) {
-            withdraw(config.PRAYERPOTION().toString(),
-                config.PRAYER_POTION_AMOUNT() - BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size)
-        }
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)
         }
@@ -740,12 +736,14 @@ class AutoVorkathPlugin : Plugin() {
         if (BankInventory.search().nameContains(config.ANTIVENOM().toString()).result().size < 1) {
             withdraw(config.ANTIVENOM().toString(), 1)
         }
-        tickDelay = 2
-        if (!Inventory.full()) {
-            for (i in 1..config.FOODAMOUNT().width - Inventory.getItemAmount(config.FOOD())) {
-                withdraw(config.FOOD(), 1)
-            }
+        if (BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size < config.PRAYER_POTION_AMOUNT() ) {
+            withdraw(config.PRAYERPOTION().toString(),
+                config.PRAYER_POTION_AMOUNT() - BankInventory.search().nameContains(config.PRAYERPOTION().toString()).result().size)
         }
+        if (!Inventory.full()) {
+            withdraw(config.FOOD().toString(), 100)
+        }
+        tickDelay = 2
         lootList.clear()
         lootIds.clear()
         changeStateTo(State.THINKING)
