@@ -334,34 +334,42 @@ class AutoVorkathPlugin : Plugin() {
         val sortedGroundItems = currentGroundItems.sortedByDescending { (_, value) -> value }
             .map { it.first.id } // Extract the sorted item IDs
 
-        // Step 3: Convert the sorted item IDs to a Set
-        val sortedItemIdsSet = sortedGroundItems.toSet()
+        // Step 3: Update lootList only
+        lootList.clear()
+        lootList.addAll(sortedGroundItems.toSet())
 
-        // Step 4: Update lootList and lootIds using the sorted Set
-        lootList.addAll(sortedItemIdsSet)
-        lootList.retainAll(sortedItemIdsSet)
-        lootIds.addAll(sortedItemIdsSet)
+        var itemInteracted = false
 
-        lootList.forEach { itemId ->
-            if (Inventory.full() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
-                InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat")
-                return
+        for (itemId in lootList) {
+            if (Inventory.full()) {
+                if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
+                    InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat")
+                    continue  // Continue looting after making space
+                } else {
+                    EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
+                    EthanApiPlugin.sendClientMessage("could not loot $lootList")
+                    changeStateTo(State.WALKING_TO_BANK)
+                    return
+                }
             }
 
-            if (!Inventory.full()) {
-                TileItems.search().withId(itemId).first().ifPresent { item: ETileItem ->
-                    item.interact(false)
-                }
-                return
-            } else {
-                EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
-                EthanApiPlugin.sendClientMessage("could not loot $lootList")
-                lootList.clear()
-                changeStateTo(State.WALKING_TO_BANK)
-                return
+            val item = TileItems.search().withId(itemId).first().orElse(null)
+            if (item != null) {
+                item.interact(false)
+                lootIds.add(itemId) // Add item to lootIds when successfully interacted
+                itemInteracted = true
+                break  // Break out of the loop after interacting with an item
             }
         }
+
+        if (itemInteracted) {
+            return  // Return from the function if an item was interacted with
+        }
+
+        // If no items were interacted with, change state to THINKING
+        changeStateTo(State.THINKING)
     }
+
 
     private fun acidState() {
         if (!runIsOff()) enableRun()
