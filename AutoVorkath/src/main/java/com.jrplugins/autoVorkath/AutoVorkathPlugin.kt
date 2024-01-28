@@ -311,11 +311,11 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun lootingState() {
+        var notEnoughFood = false  // Flag to track if there's not enough food
+
         if (lootList.isEmpty() || TileItems.search().empty()) {
             if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height) {
-                EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!")
-                changeStateTo(State.WALKING_TO_BANK, 1)
-                return
+                notEnoughFood = true  // Set the flag if there's not enough food
             }
             if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) >= config.FOODAMOUNT().height) {
                 changeStateTo(State.THINKING, 1)
@@ -323,45 +323,59 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
 
-        // Step 1: Create a list of item IDs along with their total value
         val currentGroundItems = TileItems.search().tileItems.asSequence()
             .map { it.tileItem }
             .map { it to itemManager.getItemPrice(it.id) * it.quantity }
             .filter { (item, value) -> value > config.MIN_PRICE() || itemManager.getItemPrice(item.id) == 0 }
             .toList()
 
-        // Step 2: Sort the list in descending order of value
         val sortedGroundItems = currentGroundItems.sortedByDescending { (_, value) -> value }
-            .map { it.first.id } // Extract the sorted item IDs
+            .map { it.first.id }
+            .reversed()
 
-        // Step 3: Update lootList only
         lootList.clear()
-        lootList.addAll(sortedGroundItems.toSet())
+        lootList.addAll(sortedGroundItems)
+
+        var lootedAnyItem = false
 
         for (itemId in lootList) {
             if (Inventory.full()) {
                 if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) > 0) {
                     InventoryInteraction.useItem(config.FOOD_TYPE().foodId, "Eat")
-                    // Continue after eating assuming space is made
-                    continue
+                    // Continue looting if there are more items to loot
+                    if (lootList.indexOf(itemId) < lootList.size - 1) {
+                        continue
+                    }
                 } else {
-                    EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
-                    changeStateTo(State.WALKING_TO_BANK)
-                    return
+                    if (lootedAnyItem) {
+                        EthanApiPlugin.sendClientMessage("Inventory full, going to bank.")
+                        changeStateTo(State.WALKING_TO_BANK)
+                        return
+                    } else {
+                        // No items looted, and no food, change to THINKING
+                        changeStateTo(State.THINKING)
+                        return
+                    }
                 }
             }
 
-            val item = TileItems.search().withId(itemId).first().orElse(null)
-            if (item != null) {
+            TileItems.search().withId(itemId).first().ifPresent { item: ETileItem ->
                 item.interact(false)
-                lootIds.add(itemId) // Add item to lootIds when successfully interacted
-                // Break after interacting with one item to allow it to be picked up
-                break
+                lootIds.add(itemId)
+                lootedAnyItem = true
             }
         }
 
-        // If no items were interacted with, change state to THINKING
-        changeStateTo(State.THINKING)
+        if (notEnoughFood) {
+            // If there's not enough food, change to WALKING_TO_BANK
+            EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!")
+            changeStateTo(State.WALKING_TO_BANK, 1)
+            return
+        }
+
+        if (!lootedAnyItem) {
+            changeStateTo(State.THINKING)
+        }
     }
 
 
