@@ -120,6 +120,7 @@ class AutoVorkathPlugin : Plugin() {
 
     override fun shutDown() {
         println("Auto Vorkath Plugin Deactivated")
+        totalKills = 0
         running = false
         botState = null
         drankAntiFire = false
