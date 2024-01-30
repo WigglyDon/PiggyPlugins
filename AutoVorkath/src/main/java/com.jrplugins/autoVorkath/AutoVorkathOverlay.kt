@@ -9,6 +9,7 @@ import net.runelite.client.ui.overlay.components.PanelComponent
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics2D
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class AutoVorkathOverlay @Inject private constructor(private val client: Client, plugin: AutoVorkathPlugin) :
@@ -28,13 +29,23 @@ class AutoVorkathOverlay @Inject private constructor(private val client: Client,
         slPanel.children.clear()
 
         val state = buildLine("State: ", plugin.botState.toString())
-        val tickDelay = buildLine("Tick Delay: ", plugin.tickDelay.toString())
+        val elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime))
 
         panelComponent.children.addAll(listOf(state))
-        panelComponent.children.addAll(listOf(tickDelay))
+        panelComponent.children.addAll(listOf(elapsedTime))
 
         return panelComponent.render(graphics)
     }
+
+    private fun formatTime(timeInMillis: Long): String {
+        val hours = TimeUnit.MILLISECONDS.toHours(timeInMillis)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(timeInMillis) % 60
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(timeInMillis) % 60
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+
 
     /**
      * Builds a line component with the given left and right text

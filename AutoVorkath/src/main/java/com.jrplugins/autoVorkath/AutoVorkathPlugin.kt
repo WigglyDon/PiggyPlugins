@@ -106,7 +106,8 @@ class AutoVorkathPlugin : Plugin() {
 
     override fun startUp() {
         println("Auto Vorkath Plugin Activated")
-        botState = State.THINKING
+        startTime = System.currentTimeMillis()
+        botState = State.TESTING
         running = client.gameState == GameState.LOGGED_IN
         breakHandler.registerPlugin(this)
         breakHandler.startPlugin(this)
@@ -245,8 +246,15 @@ class AutoVorkathPlugin : Plugin() {
     }
 
 
+    var startTime = System.currentTimeMillis()
+    var elapsedTime = 0L
+
     @Subscribe
     fun onGameTick(e: GameTick) {
+        val currentTime = System.currentTimeMillis()
+        elapsedTime = currentTime - startTime
+
+
         if (running) {
             if (tickDelay > 0) { // Tick delay
                 tickDelay--
@@ -879,6 +887,5 @@ class AutoVorkathPlugin : Plugin() {
     private fun changeStateTo(stateName: State, ticksToDelay: Int = 0) {
         botState = stateName
         tickDelay = ticksToDelay
-        // println("State : $stateName")
     }
 }
