@@ -760,6 +760,9 @@ class AutoVorkathPlugin : Plugin() {
         if (!hasItem("Rune pouch")) {
             withdraw("Rune pouch", 1)
         }
+        if (!hasItem("Diamond dragon bolts (e)")) {
+                BankInteraction.useItem("Diamond dragon bolts (e)", "Withdraw-All")
+            }
         if (BankInventory.search().nameContains(config.RANGEPOTION().toString()).result().size < 1) {
             withdraw(config.RANGEPOTION().toString(), 1)
         }
