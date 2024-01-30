@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2024. By Jrod7938
- *
- */
 package com.jrplugins.autoVorkath
 
 import com.example.EthanApiPlugin.Collections.*
@@ -15,7 +11,6 @@ import com.google.inject.Provides
 import com.piggyplugins.PiggyUtils.API.SpellUtil
 import com.piggyplugins.PiggyUtils.BreakHandler.ReflectBreakHandler
 import net.runelite.api.*
-import net.runelite.api.annotations.Varbit
 import net.runelite.api.coords.WorldArea
 import net.runelite.api.coords.WorldPoint
 import net.runelite.api.events.*
@@ -23,7 +18,6 @@ import net.runelite.client.config.ConfigManager
 import net.runelite.client.eventbus.Subscribe
 import net.runelite.client.events.NpcLootReceived
 import net.runelite.client.game.ItemManager
-import net.runelite.client.game.ItemStack
 import net.runelite.client.plugins.Plugin
 import net.runelite.client.plugins.PluginDescriptor
 import net.runelite.client.ui.overlay.OverlayManager
