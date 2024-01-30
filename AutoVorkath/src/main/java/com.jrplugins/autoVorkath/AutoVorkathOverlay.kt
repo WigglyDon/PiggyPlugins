@@ -30,9 +30,11 @@ class AutoVorkathOverlay @Inject private constructor(private val client: Client,
 
         val state = buildLine("State: ", plugin.botState.toString())
         val elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime))
+        val kills = buildLine("Kills: ", plugin.totalKills.toString())
 
         panelComponent.children.addAll(listOf(state))
         panelComponent.children.addAll(listOf(elapsedTime))
+        panelComponent.children.addAll(listOf(kills))
 
         return panelComponent.render(graphics)
     }

@@ -58,6 +58,10 @@ class AutoVorkathPlugin : Plugin() {
 
     var botState: State? = null
     var tickDelay: Int = 0
+    var totalKills = 0
+    var startTime = System.currentTimeMillis()
+    var elapsedTime = 0L
+    private var vorkathHpPercent : Int = 100;
     private var running = false
     private val rangeProjectileId = 1477
     private val magicProjectileId = 393
@@ -107,7 +111,7 @@ class AutoVorkathPlugin : Plugin() {
     override fun startUp() {
         println("Auto Vorkath Plugin Activated")
         startTime = System.currentTimeMillis()
-        botState = State.TESTING
+        botState = State.THINKING
         running = client.gameState == GameState.LOGGED_IN
         breakHandler.registerPlugin(this)
         breakHandler.startPlugin(this)
@@ -143,6 +147,7 @@ class AutoVorkathPlugin : Plugin() {
             EthanApiPlugin.stopPlugin(this)
         }
         if (e.message.contains("Your Vorkath kill count is:")) {
+            totalKills ++
             activateProtectPrayer(false)
             activateRigour(false)
             drankAntiFire = false
@@ -244,10 +249,6 @@ class AutoVorkathPlugin : Plugin() {
             changeStateTo(State.FIGHTING)
         }
     }
-
-
-    var startTime = System.currentTimeMillis()
-    var elapsedTime = 0L
 
     @Subscribe
     fun onGameTick(e: GameTick) {
@@ -489,8 +490,6 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
     }
-
-    private var vorkathHpPercent : Int = 100;
     private fun fightingState() {
         if (runIsOff()) enableRun()
         activateProtectPrayer(vorkathHpPercent != 0)
