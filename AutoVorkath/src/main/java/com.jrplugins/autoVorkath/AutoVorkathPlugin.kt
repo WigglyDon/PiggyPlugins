@@ -255,6 +255,7 @@ class AutoVorkathPlugin : Plugin() {
     fun onGameTick(e: GameTick) {
         val currentTime = System.currentTimeMillis()
         elapsedTime = currentTime - startTime
+        autoVorkathOverlay.updateKillsPerHour()
 
 
         if (running) {

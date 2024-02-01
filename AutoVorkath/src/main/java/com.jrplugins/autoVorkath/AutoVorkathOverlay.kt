@@ -22,6 +22,7 @@ class AutoVorkathOverlay @Inject private constructor(private val client: Client,
         position = OverlayPosition.BOTTOM_LEFT
         layer = OverlayLayer.ABOVE_SCENE
         isDragTargetable = true
+        panelComponent.preferredSize = Dimension(200, 0)
     }
 
     override fun render(graphics: Graphics2D): Dimension {
@@ -30,13 +31,29 @@ class AutoVorkathOverlay @Inject private constructor(private val client: Client,
 
         val state = buildLine("State: ", plugin.botState.toString())
         val elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime))
-        val kills = buildLine("Kills: ", plugin.totalKills.toString())
+        val kills = buildLine("Kills: ",  "${plugin.totalKills} (${
+            if (killsPerHour != 0.0) {
+                String.format("%.1f", killsPerHour)
+            } else {
+                "0.0"
+            }
+        } p/h)")
 
         panelComponent.children.addAll(listOf(state))
         panelComponent.children.addAll(listOf(elapsedTime))
         panelComponent.children.addAll(listOf(kills))
 
         return panelComponent.render(graphics)
+    }
+
+    private var killsPerHour: Double = 0.0
+
+    fun updateKillsPerHour() {
+        killsPerHour = if (plugin.elapsedTime > 0) {
+            plugin.totalKills.toDouble() / (plugin.elapsedTime.toDouble() / 3600000)
+        } else {
+            0.0
+        }
     }
 
     private fun formatTime(timeInMillis: Long): String {

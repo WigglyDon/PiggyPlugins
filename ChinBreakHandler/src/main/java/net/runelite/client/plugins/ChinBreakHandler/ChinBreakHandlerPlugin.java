@@ -159,9 +159,9 @@ public class ChinBreakHandlerPlugin extends Plugin {
                         {
                             if (!plugins.isEmpty())
                             {
-                                if (!navButton.isSelected())
+//                                if (!navButton.isSelected())
                                 {
-                                    navButton.getOnSelect().run();
+//                                    navButton.getOnSelect().run();
                                 }
                             }
                         }
