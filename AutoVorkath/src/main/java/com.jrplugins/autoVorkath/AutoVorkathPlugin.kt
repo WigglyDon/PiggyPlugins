@@ -318,6 +318,10 @@ class AutoVorkathPlugin : Plugin() {
     private fun lootingState() {
         var notEnoughFood = false
 
+        if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
+            InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
+        }
+
         if (lootList.isEmpty() || TileItems.search().empty()) {
             if (Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height) {
                 notEnoughFood = true
@@ -575,6 +579,9 @@ class AutoVorkathPlugin : Plugin() {
         if (runIsOff()) enableRun()
         activateProtectPrayer(false)
         activateRigour(false)
+        if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
+            InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
+        }
 
         if (!isMoving()) {
             if (bankArea.contains(client.localPlayer.worldLocation)) {
@@ -657,6 +664,9 @@ class AutoVorkathPlugin : Plugin() {
         if (runIsOff()) enableRun()
         activateProtectPrayer(false)
         activateRigour(false)
+        if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
+            InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
+        }
         if (breakHandler.shouldBreak(this)) { // Break handler
             breakHandler.startBreak(this)
         }
@@ -688,6 +698,9 @@ class AutoVorkathPlugin : Plugin() {
     }
 
     private fun thinkingState() {
+        if (Inventory.search().nameContains("Ruby dragon bolts (e)").result().isNotEmpty()) {
+            InventoryInteraction.useItem("Ruby dragon bolts (e)", "Wield")
+        }
         if (!inVorkathArea()) { // Check if player is not in Vorkath area
             if (readyToFight()) { // Check if player has all potions and food
                 changeStateTo(State.WALKING_TO_VORKATH) // Player is prepared, walk to Vorkath
