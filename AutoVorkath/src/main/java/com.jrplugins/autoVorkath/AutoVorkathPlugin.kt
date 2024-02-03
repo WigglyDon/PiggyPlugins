@@ -382,7 +382,7 @@ class AutoVorkathPlugin : Plugin() {
             }
         }
 
-        if (lootList.isEmpty() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height || notEnoughFood) {
+        if (Inventory.full() && lootList.isEmpty() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) < config.FOODAMOUNT().height || notEnoughFood) {
             EthanApiPlugin.sendClientMessage("Not enough food, teleporting away!")
             changeStateTo(State.WALKING_TO_BANK, 1)
             return
