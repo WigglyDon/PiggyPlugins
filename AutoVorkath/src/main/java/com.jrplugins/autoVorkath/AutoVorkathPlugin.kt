@@ -375,6 +375,7 @@ class AutoVorkathPlugin : Plugin() {
                         changeStateTo(State.WALKING_TO_BANK)
                         return
                     } else {
+                        EthanApiPlugin.sendClientMessage("bingbongboi")
                         changeStateTo(State.THINKING)
                         return
                     }
@@ -388,7 +389,8 @@ class AutoVorkathPlugin : Plugin() {
             return
         }
 
-        if (lootList.isEmpty()) {
+        if (lootList.isEmpty() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) > config.FOODAMOUNT().height) {
+            EthanApiPlugin.sendClientMessage("bingbonglass")
             changeStateTo(State.THINKING)
         }
     }

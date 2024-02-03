@@ -12,6 +12,7 @@ import com.piggyplugins.PiggyUtils.PiggyUtilsPlugin;
 import com.piggyplugins.PowerSkiller.PowerSkillerPlugin;
 import com.piggyplugins.RooftopAgility.RooftopAgilityPlugin;
 import com.piggyplugins.SpeedDartMaker.SpeedDartMakerPlugin;
+import com.piggyplugins.VardorvisHelper.VardorvisHelperPlugin;
 import com.polyplugins.AutoBoner.AutoBonerPlugin;
 import com.polyplugins.AutoCombat.AutoCombatPlugin;
 import com.polyplugins.Butterfly.ButterflyPlugin;
@@ -30,7 +31,7 @@ public class PluginTester {
                 ButterflyPlugin.class, FiremakingPlugin.class, DialogueContinuerPlugin.class,
                 KittenFeederPlugin.class, AutoChompyPlugin.class, PowerSkillerPlugin.class, AutoTrapperPlugin.class,
                 SpeedDartMakerPlugin.class, RooftopAgilityPlugin.class, UpkeepPlugin.class, PvpHelperPlugin.class, CannonReloaderPlugin.class,
-                AutoVorkathPlugin.class, PiggyUtilsPlugin.class);
+                AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class);
 // Don't remove these
         /* Add your plugins in this method when running from the IDE.
            Make sure to include them as a dependency in the build.gradle via `testImplementation` */
