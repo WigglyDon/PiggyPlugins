@@ -389,8 +389,9 @@ class AutoVorkathPlugin : Plugin() {
             return
         }
 
+
+        // this is primary restart kill block #prepared
         if (lootList.isEmpty() && Inventory.getItemAmount(config.FOOD_TYPE().foodId) > config.FOODAMOUNT().height) {
-            EthanApiPlugin.sendClientMessage("bingbonglass")
             changeStateTo(State.THINKING)
         }
     }
