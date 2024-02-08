@@ -15,7 +15,6 @@ import net.runelite.api.SpriteID;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
@@ -29,7 +28,7 @@ import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
-        name = "<html><font color=\"#FF9DF9\">[PP]</font> AutoVardorvis</html>",
+        name = "<html><font color=\"#FF9DF9\">[PP]</font> Vardorvis Helper</html>",
         description = "Tells you what to pray against or auto prays at vardovis"
 )
 public class AutoVardorvisPlugin extends Plugin {
