@@ -108,14 +108,14 @@ public class AutoVardorvisPlugin extends Plugin {
     private void onGameTick(GameTick event) {
 
 
-        List<NPC> flyingAxe = NPCs.search().withId(12227).result();
+        // spawned already
+        List<NPC> activeAxes = NPCs.search().withId(12227).result();
 
+        // about to spawn
+        List<NPC> newAxes = NPCs.search().withId(12225).result();
 
-        List<NPC> yeet = NPCs.search().result();
-
-//        12227, 12225
-        System.out.println("test: " + flyingAxe);
-        System.out.println("bingbong: " + yeet);
+        System.out.println("newAxes: " + newAxes);
+        System.out.println("activeAxes: " + activeAxes);
 
         if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
             return;
