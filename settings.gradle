@@ -44,4 +44,5 @@ include 'AutoTrapper'
 include 'AutoRuneDragons'
 include 'AutoVorkath'
 include 'AutoTitheFarm'
+include 'AutoVardorvis'
 

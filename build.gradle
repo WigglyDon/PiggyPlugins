@@ -83,6 +83,10 @@ dependencies {
     compileOnly project(path: ':AutoVorkath')
     testImplementation project(path: ':AutoVorkath')
 
+    //AUTO VARDORVIS
+    compileOnly project(path: ':AutoVardorvis')
+    testImplementation project(path: 'AutoVardorvis')
+
 }
 
 sourceSets {

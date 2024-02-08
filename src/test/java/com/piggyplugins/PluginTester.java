@@ -22,6 +22,7 @@ import com.polyplugins.KittenFeeder.KittenFeederPlugin;
 import com.polyplugins.Trapper.AutoTrapperPlugin;
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
+import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin;
 
 public class PluginTester {
     public static void main(String[] args) throws Exception {
@@ -31,8 +32,9 @@ public class PluginTester {
                 ButterflyPlugin.class, FiremakingPlugin.class, DialogueContinuerPlugin.class,
                 KittenFeederPlugin.class, AutoChompyPlugin.class, PowerSkillerPlugin.class, AutoTrapperPlugin.class,
                 SpeedDartMakerPlugin.class, RooftopAgilityPlugin.class, UpkeepPlugin.class, PvpHelperPlugin.class, CannonReloaderPlugin.class,
-                AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class);
-// Don't remove these
+                AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class,
+                AutoVardorvisPlugin.class);
+//         Don't remove these
         /* Add your plugins in this method when running from the IDE.
            Make sure to include them as a dependency in the build.gradle via `testImplementation` */
         RuneLite.main(args);

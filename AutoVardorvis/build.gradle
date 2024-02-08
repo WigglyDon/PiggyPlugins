@@ -18,7 +18,7 @@ sourceSets {
     }
 }
 
-group 'com.piggyplugins'
+group 'com.wigglydonplugins'
 version '1.0.0'
 
 test {
@@ -28,7 +28,7 @@ test {
 task PiggyJar(type: Jar) {
     manifest {
     }
-    baseName = 'vardorvis-helper'
+    baseName = 'auto-vardorvis'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
