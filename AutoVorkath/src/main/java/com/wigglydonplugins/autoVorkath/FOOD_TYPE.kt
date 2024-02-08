@@ -1,4 +1,4 @@
-package com.jrplugins.autoVorkath
+package com.wigglydonplugins.autoVorkath
 
 import lombok.Getter
 import lombok.RequiredArgsConstructor
