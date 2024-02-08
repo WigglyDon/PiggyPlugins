@@ -2,7 +2,7 @@
  * Copyright (c) 2024. By Jrod7938
  *
  */
-package com.jrplugins.autoVorkath
+package com.wigglydonplugins.autoVorkath
 
 import lombok.Getter
 import lombok.RequiredArgsConstructor

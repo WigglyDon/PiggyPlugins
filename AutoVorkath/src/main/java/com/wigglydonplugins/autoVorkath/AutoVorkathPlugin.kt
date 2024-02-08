@@ -1,4 +1,4 @@
-package com.jrplugins.autoVorkath
+package com.wigglydonplugins.autoVorkath
 
 import com.example.EthanApiPlugin.Collections.*
 import com.example.EthanApiPlugin.EthanApiPlugin
@@ -27,7 +27,7 @@ import kotlin.math.abs
 
 
 @PluginDescriptor(
-    name = "<html><font color=\"#9ddbff\">[WD]</font> Auto Vorkath </html>",
+    name = "<html><font color=\"#FF0000\">[WD]</font> Auto Vorkath </html>",
     description = "WD - Auto vorkath",
     tags = ["vorkath", "auto", "auto prayer"],
     enabledByDefault = false
