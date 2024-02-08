@@ -4,11 +4,13 @@ import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.Packets.MousePackets;
+import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
 import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
@@ -23,6 +25,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import com.google.inject.Inject;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @PluginDescriptor(
@@ -107,15 +110,37 @@ public class AutoVardorvisPlugin extends Plugin {
     @Subscribe
     private void onGameTick(GameTick event) {
 
+        // about to spawn
+        List<NPC> newAxes = NPCs.search().withId(12225).result();
 
         // spawned already
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
 
-        // about to spawn
-        List<NPC> newAxes = NPCs.search().withId(12225).result();
+        Optional<TileObject> safeRock = TileObjects.search().withAction("Leave").first();
 
-        System.out.println("newAxes: " + newAxes);
-        System.out.println("activeAxes: " + activeAxes);
+        if (!newAxes.isEmpty()) {
+            newAxes.forEach((axe) -> System.out.println("newAxe locations: " + axe.getWorldLocation()));
+
+
+        }
+
+        if (!activeAxes.isEmpty()) {
+            System.out.println("activeAxes: " + activeAxes);
+        }
+
+        WorldPoint safeLoc = null;
+
+        if (safeRock.isPresent()) {
+            WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
+            safeLoc = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
+
+            MousePackets.queueClickPacket();
+            MovementPackets.queueMovement(safeLoc);
+        }
+
+        System.out.println("player loc: " + client.getLocalPlayer().getWorldLocation());
+        System.out.print("\n safe tile loc: " + safeLoc);
+
 
         if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
             return;
