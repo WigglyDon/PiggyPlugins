@@ -2,7 +2,7 @@
  * Copyright (c) 2024. By Jrod7938
  *
  */
-package com.wigglydonplugins.autoVorkath;
+package com.jrplugins.autoVorkath;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;

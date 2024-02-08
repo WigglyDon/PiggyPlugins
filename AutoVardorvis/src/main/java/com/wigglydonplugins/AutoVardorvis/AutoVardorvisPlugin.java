@@ -1,18 +1,20 @@
 package com.wigglydonplugins.AutoVardorvis;
 
 import com.example.EthanApiPlugin.Collections.NPCs;
-import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.Packets.MousePackets;
 import com.example.Packets.WidgetPackets;
 import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.Prayer;
+import net.runelite.api.Projectile;
+import net.runelite.api.SpriteID;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
@@ -26,7 +28,7 @@ import java.util.List;
 
 @Slf4j
 @PluginDescriptor(
-        name = "<html><font color=\"#FF0000\">[WD]</font>Auto Vardorvis</html>",
+        name = "<html><font color=\"#FF9DF9\">[PP]</font> Vardorvis Helper</html>",
         description = "Tells you what to pray against or auto prays at vardovis"
 )
 public class AutoVardorvisPlugin extends Plugin {
@@ -106,17 +108,6 @@ public class AutoVardorvisPlugin extends Plugin {
 
     @Subscribe
     private void onGameTick(GameTick event) {
-
-
-        List<NPC> flyingAxe = NPCs.search().withId(12227).result();
-
-
-        List<NPC> yeet = NPCs.search().result();
-
-//        12227, 12225
-        System.out.println("test: " + flyingAxe);
-        System.out.println("bingbong: " + yeet);
-
         if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
             return;
         }

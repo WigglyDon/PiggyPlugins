@@ -1,4 +1,4 @@
-package com.wigglydonplugins.autoVorkath
+package com.jrplugins.autoVorkath
 
 import net.runelite.api.Client
 import net.runelite.client.ui.overlay.Overlay

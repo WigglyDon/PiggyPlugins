@@ -3,7 +3,7 @@ package com.piggyplugins;
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.PacketUtils.PacketUtilsPlugin;
 import com.example.UpkeepPlugin.UpkeepPlugin;
-import com.wigglydonplugins.autoVorkath.AutoVorkathPlugin;
+import com.jrplugins.autoVorkath.AutoVorkathPlugin;
 import com.piggyplugins.AutoAerial.AutoAerialPlugin;
 import com.piggyplugins.CannonReloader.CannonReloaderPlugin;
 import com.piggyplugins.Firemaking.FiremakingPlugin;

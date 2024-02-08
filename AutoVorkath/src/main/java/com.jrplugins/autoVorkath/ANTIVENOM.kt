@@ -3,7 +3,7 @@
  *
  */
 
-package com.wigglydonplugins.autoVorkath
+package com.jrplugins.autoVorkath
 
 import lombok.Getter
 import lombok.RequiredArgsConstructor
