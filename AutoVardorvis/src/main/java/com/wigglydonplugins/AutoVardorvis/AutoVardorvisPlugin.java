@@ -13,6 +13,7 @@ import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileMoved;
+import net.runelite.api.events.WorldListLoad;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
@@ -107,40 +108,29 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
+    WorldPoint safeLoc = null;
     @Subscribe
     private void onGameTick(GameTick event) {
+        WorldPoint playerLoc = client.getLocalPlayer().getWorldLocation();
+        WorldPoint safeRockLocation = TileObjects.search().withAction("Leave").first().get().getWorldLocation();
 
-        // about to spawn
+        safeLoc = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
+
+        MousePackets.queueClickPacket();
+        MovementPackets.queueMovement(safeLoc);
+
         List<NPC> newAxes = NPCs.search().withId(12225).result();
-
-        // spawned already
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
-
-        Optional<TileObject> safeRock = TileObjects.search().withAction("Leave").first();
 
         if (!newAxes.isEmpty()) {
             newAxes.forEach((axe) -> System.out.println("newAxe locations: " + axe.getWorldLocation()));
-
-
         }
 
         if (!activeAxes.isEmpty()) {
             System.out.println("activeAxes: " + activeAxes);
         }
 
-        WorldPoint safeLoc = null;
-
-        if (safeRock.isPresent()) {
-            WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
-            safeLoc = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
-
-//            MousePackets.queueClickPacket();
-//            MovementPackets.queueMovement(safeLoc);
-        }
-
-        System.out.println("player loc: " + client.getLocalPlayer().getWorldLocation());
-        System.out.print("\n safe tile loc: " + safeLoc);
-
+        ///////////////////////////////////////////////////////////
 
         if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
             return;
