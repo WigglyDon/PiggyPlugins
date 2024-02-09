@@ -38,19 +38,10 @@ import java.util.Optional;
 public class AutoVardorvisPlugin extends Plugin {
 
     private static final int RANGE_PROJECTILE = 2521;
-    private static final int MAGE_PROJECTILE = 2520; // thx for grabbing this 4 me @sdeenginer
-
     private static final String VARDOVIS = "Vardorvis";
-    private static final String VARDOVIS_HEAD = "Vardorvis' Head";
-
     private Projectile rangeProjectile;
-    private Projectile mageProjectile;
-
     private int rangeTicks = 0;
-    private int mageTicks = 0;
     private int rangeCooldown = 0;
-    private int mageCooldown = 0;
-    private boolean mageFirst;
 
     @Inject
     private Client client;
@@ -76,18 +67,6 @@ public class AutoVardorvisPlugin extends Plugin {
     @Override
     protected void shutDown() throws Exception {
         overlayManager.remove(overlay);
-    }
-
-    private void handleRangeFirstGameTick() {
-        if (rangeTicks > 0) {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MISSILES)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-            }
-        } else {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
-            }
-        }
     }
     private boolean needsToEat(int at) {
         return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
@@ -135,19 +114,53 @@ public class AutoVardorvisPlugin extends Plugin {
     }
 
     WorldPoint safeTile = null;
-    @Subscribe
-    private void onGameTick(GameTick event) {
-        if (client.getGameState() != GameState.LOGGED_IN) {
-            return;
-        }
+    WorldPoint axeMoveTile = null;
+    private boolean axeSpawned = false; // Tracks whether the axe has spawned
+    private int axeTicks = 0;
 
-        if (!isInFight()) {
-            if (PrayerUtil.isPrayerActive(Prayer.PIETY)) {
-                PrayerUtil.togglePrayer(Prayer.PIETY);
+    private void handleAxeMove() {
+        switch (axeTicks) {
+            case 0:
+                axeSpawned = true;
+                break;
+            case 1:
+                movePlayerToTile(axeMoveTile);
+                break;
+            case 2:
+                movePlayerToTile(safeTile);
+                break;
+        }
+        axeTicks --;
+    }
+    private void movePlayerToTile(WorldPoint tile) {
+        MousePackets.queueClickPacket();
+        MovementPackets.queueMovement(tile);
+    }
+
+    private void handleRangeFirstGameTick() {
+        if (rangeTicks > 0) {
+            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MISSILES)) {
+                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MISSILES);
             }
-            if (PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
+        } else {
+            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
                 PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
             }
+        }
+    }
+
+    private void turnOffPrayers() {
+        if (PrayerUtil.isPrayerActive(Prayer.PIETY)) {
+            PrayerUtil.togglePrayer(Prayer.PIETY);
+        }
+        if (PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
+            PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
+        }
+    }
+    @Subscribe
+    private void onGameTick(GameTick event) {
+        if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
+            turnOffPrayers();
             return;
         }
 
@@ -160,12 +173,12 @@ public class AutoVardorvisPlugin extends Plugin {
         if (safeRock.isPresent()) {
             WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
             safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
+            axeMoveTile = new WorldPoint(safeTile.getX() - 2, safeTile.getY() - 2, 0);
         }
 
         if (safeTile != null) {
             if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
-                MousePackets.queueClickPacket();
-                MovementPackets.queueMovement(safeTile);
+                movePlayerToTile(safeTile);
                 System.out.println("moving to safe tile");
                 return;
             } else {
@@ -190,7 +203,11 @@ public class AutoVardorvisPlugin extends Plugin {
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
 
         if (!newAxes.isEmpty()) {
-//            newAxes.forEach((axe) -> System.out.println("newAxe locations: " + axe.getWorldLocation()));
+            newAxes.forEach((axe) -> {
+                if (axe.getWorldLocation().getX() == playerTile.getX() && axe.getWorldLocation().getY() - 1 == playerTile.getY()) {
+                    handleAxeMove();
+                }
+            });
         }
 
         if (!activeAxes.isEmpty()) {
@@ -205,23 +222,11 @@ public class AutoVardorvisPlugin extends Plugin {
         }
 
         Projectile projectile = event.getProjectile();
-        if (projectile.getId() == MAGE_PROJECTILE) {
-            if (mageProjectile == null && mageCooldown == 0) {
-                mageTicks = 4;
-                mageProjectile = projectile;
-                if (rangeProjectile == null) {
-                    mageFirst = true;
-                }
-            }
-        }
 
         if (projectile.getId() == RANGE_PROJECTILE) {
             if (rangeProjectile == null && rangeCooldown == 0) {
                 rangeTicks = 4;
                 rangeProjectile = projectile;
-                if (mageProjectile == null) {
-                    mageFirst = false;
-                }
             }
         }
     }
@@ -240,9 +245,6 @@ public class AutoVardorvisPlugin extends Plugin {
     }
 
     public int getPrayerSprite() {
-        if (mageTicks > 0) {
-            return SpriteID.PRAYER_PROTECT_FROM_MAGIC;
-        }
         if (rangeTicks > 0) {
             return SpriteID.PRAYER_PROTECT_FROM_MISSILES;
         }
@@ -251,10 +253,6 @@ public class AutoVardorvisPlugin extends Plugin {
     }
 
     public Prayer getCorrectPrayer() {
-        if (mageTicks > 0) {
-            return Prayer.PROTECT_FROM_MAGIC;
-        }
-
         if (rangeTicks > 0) {
             return Prayer.PROTECT_FROM_MISSILES;
         }
