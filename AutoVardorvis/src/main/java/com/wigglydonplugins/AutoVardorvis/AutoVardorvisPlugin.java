@@ -108,9 +108,19 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
+    private boolean inVardorvisArea() {
+        return (!NPCs.search().nameContains(VARDOVIS).result().isEmpty() && client.isInInstancedRegion());
+    }
+
     WorldPoint safeTile = null;
     @Subscribe
     private void onGameTick(GameTick event) {
+
+        if (!inVardorvisArea()) {
+            System.out.println("not in vardorvis area");
+            return;
+        }
+
         WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
         Optional<TileObject> safeRock =TileObjects.search().withAction("Leave").first();
 
@@ -123,12 +133,18 @@ public class AutoVardorvisPlugin extends Plugin {
             if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
                 MousePackets.queueClickPacket();
                 MovementPackets.queueMovement(safeTile);
-            } else {
-                NPCs.search().nameContains(VARDOVIS).first().ifPresent(vardorvis -> {
-                    NPCInteraction.interact(vardorvis, "Attack");
-                });
+                System.out.println("moving to safe tile");
             }
         }
+
+        if (!client.getLocalPlayer().isInteracting()) {
+            NPCs.search().nameContains(VARDOVIS).first().ifPresent(vardorvis -> {
+                NPCInteraction.interact(vardorvis, "Attack");
+                System.out.println("attack vardorvis");
+            });
+        }
+
+
 
         List<NPC> newAxes = NPCs.search().withId(12225).result();
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
