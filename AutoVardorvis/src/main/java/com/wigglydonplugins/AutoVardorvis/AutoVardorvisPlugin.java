@@ -134,8 +134,8 @@ public class AutoVardorvisPlugin extends Plugin {
             WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
             safeLoc = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
 
-            MousePackets.queueClickPacket();
-            MovementPackets.queueMovement(safeLoc);
+//            MousePackets.queueClickPacket();
+//            MovementPackets.queueMovement(safeLoc);
         }
 
         System.out.println("player loc: " + client.getLocalPlayer().getWorldLocation());
