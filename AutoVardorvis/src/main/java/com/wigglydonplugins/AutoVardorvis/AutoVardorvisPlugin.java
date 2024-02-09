@@ -115,13 +115,13 @@ public class AutoVardorvisPlugin extends Plugin {
 
     WorldPoint safeTile = null;
     WorldPoint axeMoveTile = null;
-    private boolean axeSpawned = false; // Tracks whether the axe has spawned
     private int axeTicks = 0;
 
     private void handleAxeMove() {
+        System.out.println("axe ticks: " + axeTicks);
         switch (axeTicks) {
             case 0:
-                axeSpawned = true;
+
                 break;
             case 1:
                 movePlayerToTile(axeMoveTile);
@@ -130,7 +130,7 @@ public class AutoVardorvisPlugin extends Plugin {
                 movePlayerToTile(safeTile);
                 break;
         }
-        axeTicks --;
+        axeTicks ++;
     }
     private void movePlayerToTile(WorldPoint tile) {
         MousePackets.queueClickPacket();
@@ -173,13 +173,12 @@ public class AutoVardorvisPlugin extends Plugin {
         if (safeRock.isPresent()) {
             WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
             safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
-            axeMoveTile = new WorldPoint(safeTile.getX() - 2, safeTile.getY() - 2, 0);
+            axeMoveTile = new WorldPoint(safeTile.getX() + 2, safeTile.getY() - 2, 0);
         }
 
         if (safeTile != null) {
             if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
                 movePlayerToTile(safeTile);
-                System.out.println("moving to safe tile");
                 return;
             } else {
                 eat(75);
@@ -194,7 +193,6 @@ public class AutoVardorvisPlugin extends Plugin {
         if (!client.getLocalPlayer().isInteracting()) {
             NPCs.search().nameContains(VARDOVIS).first().ifPresent(vardorvis -> {
                 NPCInteraction.interact(vardorvis, "Attack");
-                System.out.println("attack vardorvis");
             });
             return;
         }
@@ -204,8 +202,10 @@ public class AutoVardorvisPlugin extends Plugin {
 
         if (!newAxes.isEmpty()) {
             newAxes.forEach((axe) -> {
-                if (axe.getWorldLocation().getX() == playerTile.getX() && axe.getWorldLocation().getY() - 1 == playerTile.getY()) {
+                if (axe.getWorldLocation().getX() + 1 == safeTile.getX() && axe.getWorldLocation().getY() + 1 == safeTile.getY()) {
                     handleAxeMove();
+                } else {
+                    axeTicks = 0;
                 }
             });
         }
