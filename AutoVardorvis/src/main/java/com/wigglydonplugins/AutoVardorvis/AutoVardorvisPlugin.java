@@ -1,9 +1,11 @@
 package com.wigglydonplugins.AutoVardorvis;
 
+import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.EthanApiPlugin.EthanApiPlugin;
+import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.MovementPackets;
@@ -112,6 +114,30 @@ public class AutoVardorvisPlugin extends Plugin {
         return (!NPCs.search().nameContains(VARDOVIS).result().isEmpty() && client.isInInstancedRegion());
     }
 
+    private void eat(int at) {
+        if (needsToEat(at)) {
+            Inventory.search().withAction("Eat").result().stream()
+                    .findFirst()
+                    .ifPresent(food -> InventoryInteraction.useItem(food, "Eat"));
+        }
+    }
+
+    private void drinkPrayer(int at) {
+        if (needsToDrinkPrayer(at)) {
+            Inventory.search().withAction("Drink").result().stream()
+                    .findFirst()
+                    .ifPresent(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"));
+        }
+    }
+
+    private boolean needsToEat(int at) {
+        return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
+    }
+
+    private boolean needsToDrinkPrayer(int at) {
+        return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
+    }
+
     WorldPoint safeTile = null;
     @Subscribe
     private void onGameTick(GameTick event) {
@@ -134,6 +160,7 @@ public class AutoVardorvisPlugin extends Plugin {
                 MousePackets.queueClickPacket();
                 MovementPackets.queueMovement(safeTile);
                 System.out.println("moving to safe tile");
+                return;
             }
         }
 
@@ -142,7 +169,11 @@ public class AutoVardorvisPlugin extends Plugin {
                 NPCInteraction.interact(vardorvis, "Attack");
                 System.out.println("attack vardorvis");
             });
+            return;
         }
+
+        eat(75);
+        drinkPrayer(25);
 
 
 
