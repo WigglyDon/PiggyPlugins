@@ -3,6 +3,8 @@ package com.wigglydonplugins.AutoVardorvis;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
+import com.example.EthanApiPlugin.EthanApiPlugin;
+import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
@@ -13,9 +15,7 @@ import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileMoved;
-import net.runelite.api.events.WorldListLoad;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
@@ -108,16 +108,27 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
-    WorldPoint safeLoc = null;
+    WorldPoint safeTile = null;
     @Subscribe
     private void onGameTick(GameTick event) {
-        WorldPoint playerLoc = client.getLocalPlayer().getWorldLocation();
-        WorldPoint safeRockLocation = TileObjects.search().withAction("Leave").first().get().getWorldLocation();
+        WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
+        Optional<TileObject> safeRock =TileObjects.search().withAction("Leave").first();
 
-        safeLoc = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
+        if (safeRock.isPresent()) {
+            WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
+            safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
+        }
 
-        MousePackets.queueClickPacket();
-        MovementPackets.queueMovement(safeLoc);
+        if (safeTile != null) {
+            if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
+                MousePackets.queueClickPacket();
+                MovementPackets.queueMovement(safeTile);
+            } else {
+                NPCs.search().nameContains(VARDOVIS).first().ifPresent(vardorvis -> {
+                    NPCInteraction.interact(vardorvis, "Attack");
+                });
+            }
+        }
 
         List<NPC> newAxes = NPCs.search().withId(12225).result();
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
