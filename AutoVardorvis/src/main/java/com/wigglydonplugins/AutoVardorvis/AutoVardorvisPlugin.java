@@ -78,44 +78,27 @@ public class AutoVardorvisPlugin extends Plugin {
         overlayManager.remove(overlay);
     }
 
-    private void handleMageFirstGameTick() {
-        if (mageTicks > 0) {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MAGIC)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MAGIC);
-            }
-        } else if (rangeTicks > 0) {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MISSILES)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-            }
-        } else {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
-            }
-        }
-    }
-
     private void handleRangeFirstGameTick() {
         if (rangeTicks > 0) {
             if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MISSILES)) {
                 PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MISSILES);
             }
-        } else if (mageTicks > 0) {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MAGIC)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MAGIC);
-            }
         } else {
             if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
                 PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
             }
         }
     }
-
-    private boolean inVardorvisArea() {
-        return (!NPCs.search().nameContains(VARDOVIS).result().isEmpty() && client.isInInstancedRegion());
+    private boolean needsToEat(int at) {
+        return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
     }
 
+    private boolean needsToDrinkPrayer(int at) {
+        return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
+    }
     private void eat(int at) {
         if (needsToEat(at)) {
+            System.out.println("ATE FOOD");
             Inventory.search().withAction("Eat").result().stream()
                     .findFirst()
                     .ifPresent(food -> InventoryInteraction.useItem(food, "Eat"));
@@ -124,28 +107,52 @@ public class AutoVardorvisPlugin extends Plugin {
 
     private void drinkPrayer(int at) {
         if (needsToDrinkPrayer(at)) {
-            Inventory.search().withAction("Drink").result().stream()
+            System.out.println("DRANK POT");
+            Inventory.search().nameContains("Prayer potion").result().stream()
                     .findFirst()
                     .ifPresent(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"));
         }
     }
 
-    private boolean needsToEat(int at) {
-        return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
-    }
+    private void autoPray() {
+        if (rangeTicks > 0) {
+            rangeTicks--;
+            if (rangeTicks == 0) {
+                rangeCooldown = 3;
+            }
+        }
 
-    private boolean needsToDrinkPrayer(int at) {
-        return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
+        if (rangeTicks == 0) {
+            rangeProjectile = null;
+            if (rangeCooldown > 0) {
+                rangeCooldown--;
+            }
+        }
+
+        if (config.autoPray()) {
+            handleRangeFirstGameTick();
+        }
     }
 
     WorldPoint safeTile = null;
     @Subscribe
     private void onGameTick(GameTick event) {
-
-        if (!inVardorvisArea()) {
-            System.out.println("not in vardorvis area");
+        if (client.getGameState() != GameState.LOGGED_IN) {
             return;
         }
+
+        if (!isInFight()) {
+            if (PrayerUtil.isPrayerActive(Prayer.PIETY)) {
+                PrayerUtil.togglePrayer(Prayer.PIETY);
+            }
+            if (PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
+                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
+            }
+            return;
+        }
+
+        autoPray();
+        doBloodCaptcha();
 
         WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
         Optional<TileObject> safeRock =TileObjects.search().withAction("Leave").first();
@@ -161,7 +168,14 @@ public class AutoVardorvisPlugin extends Plugin {
                 MovementPackets.queueMovement(safeTile);
                 System.out.println("moving to safe tile");
                 return;
+            } else {
+                eat(75);
+                drinkPrayer(25);
             }
+        }
+
+        if (!PrayerUtil.isPrayerActive(Prayer.PIETY)) {
+            PrayerUtil.togglePrayer(Prayer.PIETY);
         }
 
         if (!client.getLocalPlayer().isInteracting()) {
@@ -172,68 +186,16 @@ public class AutoVardorvisPlugin extends Plugin {
             return;
         }
 
-        eat(75);
-        drinkPrayer(25);
-
-
-
         List<NPC> newAxes = NPCs.search().withId(12225).result();
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
 
         if (!newAxes.isEmpty()) {
-            newAxes.forEach((axe) -> System.out.println("newAxe locations: " + axe.getWorldLocation()));
+//            newAxes.forEach((axe) -> System.out.println("newAxe locations: " + axe.getWorldLocation()));
         }
 
         if (!activeAxes.isEmpty()) {
-            System.out.println("activeAxes: " + activeAxes);
+//            System.out.println("activeAxes: " + activeAxes);
         }
-
-        ///////////////////////////////////////////////////////////
-
-        if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
-            return;
-        }
-
-        if (mageTicks > 0) {
-            mageTicks--;
-            if (mageTicks == 0) {
-                mageCooldown = 3;
-                if (mageFirst) {
-                    mageFirst = false;
-                }
-            }
-        }
-
-        if (rangeTicks > 0) {
-            rangeTicks--;
-            if (rangeTicks == 0) {
-                rangeCooldown = 3;
-            }
-        }
-
-        if (mageTicks == 0) {
-            mageProjectile = null;
-            if (mageCooldown > 0) {
-                mageCooldown--;
-            }
-        }
-
-        if (rangeTicks == 0) {
-            rangeProjectile = null;
-            if (rangeCooldown > 0) {
-                rangeCooldown--;
-            }
-        }
-
-        if (config.autoPray()) {
-            if (mageFirst) {
-                handleMageFirstGameTick();
-            } else {
-                handleRangeFirstGameTick();
-            }
-        }
-        doBloodCaptcha();
-
     }
 
     @Subscribe
