@@ -18,29 +18,33 @@ import java.util.List;
 import java.util.Optional;
 
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
-import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.eventbus.Subscribe;
 
 public class FightingState {
 
-    private static final String VARDORVIS = "Vardorvis";
-    private static Client client;
-    private static AutoVardorvisConfig config;
-    static WorldPoint safeTile = null;
-    private static boolean drankSuperCombat;
-    static WorldPoint axeMoveTile = null;
-    private static int axeTicks = 0;
-    private static final int RANGE_PROJECTILE = 2521;
-    private Projectile rangeProjectile;
+    private final String VARDORVIS = "Vardorvis";
+    private Client client;
+    private AutoVardorvisConfig config;
+    private int rangeTicks;
+    private int rangeCooldown;
+    WorldPoint safeTile = null;
+    private WorldPoint lastKnownSafeTile;
+    private boolean drankSuperCombat;
+    WorldPoint axeMoveTile = null;
+    private int axeTicks = 0;
 
-    private static int rangeTicks = 0;
-    private static int rangeCooldown = 0;
-
-    public static void execute(MainClassContext context) {
+    public void execute(MainClassContext context) {
         client = context.getClient();
         config = context.getConfig();
+
+        rangeTicks = context.getRangeTicks();
+        context.setRangeTicks(rangeTicks);
+
+        rangeCooldown = context.getRangeCooldown();
+        context.setRangeCooldown(rangeCooldown);
+
         drankSuperCombat = context.isDrankSuperCombat();
+        context.setDrankSuperCombat(drankSuperCombat);
 
         List<NPC> newAxes = NPCs.search().withId(12225).result();
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
@@ -99,7 +103,7 @@ public class FightingState {
             });
         }
 
-        if (safeRock.isPresent()) {
+        if (safeRock.isPresent() && safeTile == null) {
             WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
             safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
             axeMoveTile = new WorldPoint(safeTile.getX() + 2, safeTile.getY() - 2, 0);
@@ -121,23 +125,7 @@ public class FightingState {
             });
         }
     }
-
-    @Subscribe
-    private void onProjectileMoved(ProjectileMoved event) {
-        if (client.getGameState() != GameState.LOGGED_IN) {
-            return;
-        }
-
-        Projectile projectile = event.getProjectile();
-
-        if (projectile.getId() == RANGE_PROJECTILE) {
-            if (rangeProjectile == null && rangeCooldown == 0) {
-                rangeTicks = 4;
-                rangeProjectile = projectile;
-            }
-        }
-    }
-    private static void handleAxeMove() {
+    private void handleAxeMove() {
         switch (axeTicks) {
             case 0:
                 break;
@@ -151,11 +139,11 @@ public class FightingState {
             axeTicks++;
         }
     }
-    private static void movePlayerToTile(WorldPoint tile) {
+    private void movePlayerToTile(WorldPoint tile) {
         MousePackets.queueClickPacket();
         MovementPackets.queueMovement(tile);
     }
-    private static void doBloodCaptcha() {
+    private void doBloodCaptcha() {
         List<Widget> captchaBlood = Widgets.search().filter(widget -> widget.getParentId() != 9764864).hiddenState(false).withAction("Destroy").result();
         if (!captchaBlood.isEmpty()) {
             captchaBlood.forEach(x -> {
@@ -164,10 +152,10 @@ public class FightingState {
             });
         }
     }
-    private static boolean isInFight(Client client) {
+    private boolean isInFight(Client client) {
         return client.isInInstancedRegion() && NPCs.search().nameContains(VARDORVIS).nearestToPlayer().isPresent();
     }
-    private static void turnOffPrayers() {
+    private void turnOffPrayers() {
         if (PrayerUtil.isPrayerActive(Prayer.PIETY)) {
             PrayerUtil.togglePrayer(Prayer.PIETY);
         }
@@ -175,8 +163,7 @@ public class FightingState {
             PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
         }
     }
-    private static void autoPray() {
-        System.out.println("rangeTicks" + rangeTicks);
+    private void autoPray() {
         if (rangeTicks > 0) {
             rangeTicks--;
             if (rangeTicks == 0) {
@@ -191,7 +178,7 @@ public class FightingState {
         }
         handleRangeFirstGameTick();
     }
-    private static void handleRangeFirstGameTick() {
+    private void handleRangeFirstGameTick() {
         if (rangeTicks > 0) {
             if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MISSILES)) {
                 PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MISSILES);
@@ -202,7 +189,7 @@ public class FightingState {
             }
         }
     }
-    private static void eat(int at) {
+    private void eat(int at) {
         if (needsToEat(at)) {
             Inventory.search().withAction("Eat").result().stream()
                     .findFirst()
@@ -212,7 +199,7 @@ public class FightingState {
         }
     }
 
-    private static void drinkPrayer(int at) {
+    private void drinkPrayer(int at) {
         if (needsToDrinkPrayer(at)) {
             Inventory.search().nameContains("Prayer potion").result().stream()
                     .findFirst()
@@ -221,17 +208,17 @@ public class FightingState {
                     );
         }
     }
-    private static boolean needsToEat(int at) {
+    private boolean needsToEat(int at) {
         return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
     }
 
 
-    private static void teleToHouse() {
+    private void teleToHouse() {
         InventoryInteraction.useItem("Teleport to house", "Break");
         drankSuperCombat = false;
     }
 
-    private static boolean needsToDrinkPrayer(int at) {
+    private boolean needsToDrinkPrayer(int at) {
         return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
     }
 }

@@ -25,7 +25,10 @@ import com.google.inject.Inject;
 )
 public class AutoVardorvisPlugin extends Plugin {
 
-
+    private static final int RANGE_PROJECTILE = 2521;
+    private Projectile rangeProjectile;
+    private int rangeTicks = 0;
+    private int rangeCooldown = 0;
 
 
     int totalKills = 0;
@@ -73,13 +76,17 @@ public class AutoVardorvisPlugin extends Plugin {
     @Getter
     @Setter
     public static class MainClassContext {
-        private final Client client;
-        private final AutoVardorvisConfig config;
-        private final boolean drankSuperCombat;
+        private Client client;
+        private AutoVardorvisConfig config;
+        private int rangeTicks;
+        private int rangeCooldown;
+        private boolean drankSuperCombat;
 
-        public MainClassContext(Client client, AutoVardorvisConfig config, boolean drankSuperCombat) {
+        public MainClassContext(Client client, AutoVardorvisConfig config, int rangeTicks, int rangeCooldown, boolean drankSuperCombat) {
             this.client = client;
             this.config = config;
+            this.rangeTicks = rangeTicks;
+            this.rangeCooldown = rangeCooldown;
             this.drankSuperCombat = drankSuperCombat;
         }
     }
@@ -89,8 +96,9 @@ public class AutoVardorvisPlugin extends Plugin {
             System.out.println("Null state...");
             return;
         }
-        MainClassContext context = new MainClassContext(client, config, drankSuperCombat);
-        StateHandler.handleState(botState, context);
+        MainClassContext context = new MainClassContext(client, config, rangeTicks, rangeCooldown, drankSuperCombat);
+        StateHandler stateHandler = new StateHandler();
+        stateHandler.handleState(botState, context);
     }
     @Subscribe
     private void onGameTick(GameTick event) {
@@ -119,7 +127,21 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
+    @Subscribe
+    private void onProjectileMoved(ProjectileMoved event) {
+        if (client.getGameState() != GameState.LOGGED_IN) {
+            return;
+        }
 
+        Projectile projectile = event.getProjectile();
+
+        if (projectile.getId() == RANGE_PROJECTILE) {
+            if (rangeProjectile == null && rangeCooldown == 0) {
+                rangeTicks = 4;
+                rangeProjectile = projectile;
+            }
+        }
+    }
 
     @Subscribe
     private void onChatMessage(ChatMessage e) {

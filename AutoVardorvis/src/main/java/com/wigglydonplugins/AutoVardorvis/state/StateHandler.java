@@ -10,13 +10,13 @@ public class StateHandler {
         FIGHTING,
     }
 
-    public static void handleState(State state, MainClassContext context) {
+    public void handleState(State state, MainClassContext context) {
         switch (state) {
             case TESTING:
                 TestingState.execute();
                 break;
             case FIGHTING:
-                FightingState.execute(context);
+                new FightingState().execute(context);
                 break;
 
             default:
