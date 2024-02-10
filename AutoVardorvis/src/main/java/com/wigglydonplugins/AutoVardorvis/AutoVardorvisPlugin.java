@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.NpcChanged;
+import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
@@ -24,6 +26,7 @@ import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.api.events.AnimationChanged;
 
 import com.google.inject.Inject;
 
@@ -33,7 +36,7 @@ import java.util.Optional;
 @Slf4j
 @PluginDescriptor(
         name = "<html><font color=\"#FF0000\">[WD]</font>Auto Vardorvis</html>",
-        description = "Tells you what to pray against or auto prays at vardovis"
+        description = "Automated vardorvis killer"
 )
 public class AutoVardorvisPlugin extends Plugin {
 
@@ -116,7 +119,7 @@ public class AutoVardorvisPlugin extends Plugin {
     private int axeTicks = 0;
 
     private void handleAxeMove() {
-        System.out.println("axe ticks: " + axeTicks);
+        System.out.println("axeTicks: " + axeTicks);
         switch (axeTicks) {
             case 0:
                 break;
@@ -157,46 +160,41 @@ public class AutoVardorvisPlugin extends Plugin {
     }
     @Subscribe
     private void onGameTick(GameTick event) {
+        List<NPC> newAxes = NPCs.search().withId(12225).result();
+        List<NPC> activeAxes = NPCs.search().withId(12227).result();
+        Optional<NPC> vardorvis = NPCs.search().nameContains(VARDOVIS).first();
+
+        WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
+        Optional<TileObject> safeRock =TileObjects.search().withAction("Leave").first();
+
         if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
             turnOffPrayers();
             return;
         }
 
         autoPray();
-        doBloodCaptcha();
-
-        WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
-        Optional<TileObject> safeRock =TileObjects.search().withAction("Leave").first();
-
-        if (safeRock.isPresent()) {
-            WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
-            safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
-            axeMoveTile = new WorldPoint(safeTile.getX() + 2, safeTile.getY() - 2, 0);
-        }
-
-        if (safeTile != null) {
-            if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
-                movePlayerToTile(safeTile);
-                return;
-            } else {
-                eat(75);
-                drinkPrayer(25);
-            }
-        }
-
         if (!PrayerUtil.isPrayerActive(Prayer.PIETY)) {
             PrayerUtil.togglePrayer(Prayer.PIETY);
         }
+        doBloodCaptcha();
 
-        if (!client.getLocalPlayer().isInteracting()) {
-            NPCs.search().nameContains(VARDOVIS).first().ifPresent(vardorvis -> {
-                NPCInteraction.interact(vardorvis, "Attack");
-            });
-            return;
+
+        //initial attack
+        if (vardorvis.isPresent() && safeTile != null) {
+            if (vardorvis.get().getWorldLocation().getX() == safeTile.getX() + 4
+                    && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
+                    && vardorvis.get().getAnimation() == -1
+            ) {
+                vardorvis.ifPresent(npc -> {
+                    NPCInteraction.interact(npc, "Attack");
+                });
+                return;
+            } else if (vardorvis.get().getWorldLocation().getX() != safeTile.getX() + 1
+            && vardorvis.get().getWorldLocation().getY() != safeTile.getY() - 1) {
+                movePlayerToTile(safeTile);
+            }
         }
 
-        List<NPC> newAxes = NPCs.search().withId(12225).result();
-        List<NPC> activeAxes = NPCs.search().withId(12227).result();
 
         if (!newAxes.isEmpty()) {
             newAxes.forEach((axe) -> {
@@ -214,7 +212,50 @@ public class AutoVardorvisPlugin extends Plugin {
                 }
             });
         }
+
+        if (safeRock.isPresent()) {
+            WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
+            safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
+            axeMoveTile = new WorldPoint(safeTile.getX() + 2, safeTile.getY() - 2, 0);
+        }
+
+        if (safeTile != null) {
+            if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
+                movePlayerToTile(safeTile);
+                return;
+            } else {
+                eat(55);
+                drinkPrayer(15);
+            }
+        }
+
+        if (!client.getLocalPlayer().isInteracting()) {
+            NPCs.search().nameContains(VARDOVIS).first().ifPresent(npc -> {
+                NPCInteraction.interact(npc, "Attack");
+            });
+        }
     }
+
+//    @Subscribe
+//    private void onNpcSpawned(NpcSpawned event) {
+//        System.out.println(event.getNpc().getName() + " spawned");
+//
+//        if (event.getNpc().getId() == 12225) {
+//            if (event.getNpc().getWorldLocation().getX() == safeTile.getX() - 1 && event.getNpc().getWorldLocation().getY() == safeTile.getY() - 1) {
+//                System.out.println("AXE SPAWNED ON PLAYER");
+//                handleAxeMove();
+//            }
+//        }
+//    }
+//    @Subscribe
+//    private void onAnimationChanged(AnimationChanged event) {
+////      List<NPC> activeAxes = NPCs.search().withId(12227).result();
+//        if (event.getActor().getWorldLocation().getX() == safeTile.getX() + 1 && event.getActor().getWorldLocation().getY() == safeTile.getY() - 1) {
+//            System.out.println("AXE RETURNING TO PLAYER");
+//            axeTicks = 1;
+//            handleAxeMove();
+//        }
+//    }
 
     @Subscribe
     private void onProjectileMoved(ProjectileMoved event) {
