@@ -18,29 +18,30 @@ import java.util.List;
 import java.util.Optional;
 
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
+import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.eventbus.Subscribe;
 
 public class FightingState {
 
     private static final String VARDORVIS = "Vardorvis";
     private static Client client;
     private static AutoVardorvisConfig config;
-    private static int rangeTicks;
-    private static int rangeCooldown;
     static WorldPoint safeTile = null;
     private static boolean drankSuperCombat;
     static WorldPoint axeMoveTile = null;
     private static int axeTicks = 0;
+    private static final int RANGE_PROJECTILE = 2521;
+    private Projectile rangeProjectile;
+
+    private static int rangeTicks = 0;
+    private static int rangeCooldown = 0;
 
     public static void execute(MainClassContext context) {
         client = context.getClient();
         config = context.getConfig();
-        rangeTicks = context.getRangeTicks();
-        rangeCooldown = context.getRangeCooldown();
         drankSuperCombat = context.isDrankSuperCombat();
 
-
-        System.out.println("fighting state");
         List<NPC> newAxes = NPCs.search().withId(12225).result();
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
         Optional<NPC> vardorvis = NPCs.search().nameContains(VARDORVIS).first();
@@ -119,9 +120,22 @@ public class FightingState {
                 NPCInteraction.interact(npc, "Attack");
             });
         }
+    }
 
+    @Subscribe
+    private void onProjectileMoved(ProjectileMoved event) {
+        if (client.getGameState() != GameState.LOGGED_IN) {
+            return;
+        }
 
+        Projectile projectile = event.getProjectile();
 
+        if (projectile.getId() == RANGE_PROJECTILE) {
+            if (rangeProjectile == null && rangeCooldown == 0) {
+                rangeTicks = 4;
+                rangeProjectile = projectile;
+            }
+        }
     }
     private static void handleAxeMove() {
         switch (axeTicks) {
@@ -162,6 +176,7 @@ public class FightingState {
         }
     }
     private static void autoPray() {
+        System.out.println("rangeTicks" + rangeTicks);
         if (rangeTicks > 0) {
             rangeTicks--;
             if (rangeTicks == 0) {

@@ -1,35 +1,22 @@
 package com.wigglydonplugins.AutoVardorvis;
 
 import com.example.EthanApiPlugin.Collections.Inventory;
-import com.example.EthanApiPlugin.Collections.NPCs;
-import com.example.EthanApiPlugin.Collections.TileObjects;
-import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.InteractionApi.InventoryInteraction;
-import com.example.InteractionApi.NPCInteraction;
-import com.example.Packets.MousePackets;
-import com.example.Packets.MovementPackets;
-import com.example.Packets.WidgetPackets;
 import com.google.inject.Provides;
-import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
-import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-
 import com.google.inject.Inject;
-
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @PluginDescriptor(
@@ -38,10 +25,7 @@ import java.util.Optional;
 )
 public class AutoVardorvisPlugin extends Plugin {
 
-    private static final int RANGE_PROJECTILE = 2521;
-    private Projectile rangeProjectile;
-    private int rangeTicks = 0;
-    private int rangeCooldown = 0;
+
 
 
     int totalKills = 0;
@@ -86,23 +70,18 @@ public class AutoVardorvisPlugin extends Plugin {
         botState = null;
     }
 
-    //YEET
     @Getter
+    @Setter
     public static class MainClassContext {
         private final Client client;
         private final AutoVardorvisConfig config;
-        private final int rangeTicks;
-        private final int rangeCooldown;
         private final boolean drankSuperCombat;
 
-        public MainClassContext(Client client, AutoVardorvisConfig config, int rangeTicks, int rangeCooldown, boolean drankSuperCombat) {
+        public MainClassContext(Client client, AutoVardorvisConfig config, boolean drankSuperCombat) {
             this.client = client;
             this.config = config;
-            this.rangeTicks = rangeTicks;
-            this.rangeCooldown = rangeCooldown;
             this.drankSuperCombat = drankSuperCombat;
         }
-
     }
 
     private void handleBotState(State botState) {
@@ -110,12 +89,9 @@ public class AutoVardorvisPlugin extends Plugin {
             System.out.println("Null state...");
             return;
         }
-        MainClassContext context = new MainClassContext(client, config, rangeTicks, rangeCooldown, drankSuperCombat);
+        MainClassContext context = new MainClassContext(client, config, drankSuperCombat);
         StateHandler.handleState(botState, context);
     }
-
-    //YEET
-
     @Subscribe
     private void onGameTick(GameTick event) {
         long currentTime = System.currentTimeMillis();
@@ -143,47 +119,12 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
-    @Subscribe
-    private void onProjectileMoved(ProjectileMoved event) {
-        if (client.getGameState() != GameState.LOGGED_IN) {
-            return;
-        }
 
-        Projectile projectile = event.getProjectile();
-
-        if (projectile.getId() == RANGE_PROJECTILE) {
-            if (rangeProjectile == null && rangeCooldown == 0) {
-                rangeTicks = 4;
-                rangeProjectile = projectile;
-            }
-        }
-    }
 
     @Subscribe
     private void onChatMessage(ChatMessage e) {
         if (e.getMessage().contains("Your Vardorvis kill count is:")) {
             totalKills ++;
         }
-    }
-
-    /**
-     * 1 tick blood captcha. Thanks, @Lunatik
-     */
-
-
-    public int getPrayerSprite() {
-        if (rangeTicks > 0) {
-            return SpriteID.PRAYER_PROTECT_FROM_MISSILES;
-        }
-
-        return SpriteID.PRAYER_PROTECT_FROM_MELEE;
-    }
-
-    public Prayer getCorrectPrayer() {
-        if (rangeTicks > 0) {
-            return Prayer.PROTECT_FROM_MISSILES;
-        }
-
-        return Prayer.PROTECT_FROM_MELEE;
     }
 }
