@@ -38,8 +38,6 @@ public class AutoVardorvisOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics2D) {
         panelComponent.getChildren().clear();
-        BufferedImage prayerImage;
-        prayerImage = getPrayerImage(plugin.getPrayerSprite());
 
         LineComponent elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime));
 
@@ -51,18 +49,11 @@ public class AutoVardorvisOverlay extends OverlayPanel {
         }
 
         LineComponent kills = buildLine("Kills: ", plugin.totalKills + " (" + killsText + " p/h)");
-
-
-        panelComponent.setBackgroundColor(client.isPrayerActive(plugin.getCorrectPrayer()) ? Color.GREEN : Color.RED);
-        panelComponent.getChildren().add(new ImageComponent(prayerImage));
+        
         panelComponent.getChildren().add(elapsedTime);
         panelComponent.getChildren().add(kills);
 
         return super.render(graphics2D);
-    }
-
-    private BufferedImage getPrayerImage(int spriteId) {
-        return spriteManager.getSprite(spriteId, 0);
     }
 
     private LineComponent buildLine(String left, String right) {

@@ -14,6 +14,7 @@ import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.annotations.Varbit;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
@@ -240,6 +241,18 @@ public class AutoVardorvisPlugin extends Plugin {
             NPCs.search().nameContains(VARDOVIS).first().ifPresent(npc -> {
                 NPCInteraction.interact(npc, "Attack");
             });
+        }
+    }
+
+
+    @Subscribe
+    private void onVarbitChanged(VarbitChanged event) {
+        if (event.getVarpId() == Varbits.DIVINE_SUPER_COMBAT) {
+            if (event.getValue() <= 100000000) {
+                Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
+                    InventoryInteraction.useItem(potion, "Drink");
+                });
+            }
         }
     }
 
