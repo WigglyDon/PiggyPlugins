@@ -74,9 +74,16 @@ public class AutoVardorvisPlugin extends Plugin {
     protected void shutDown() throws Exception {
         totalKills = 0;
         overlayManager.remove(overlay);
+        drankSuperCombat = false;
     }
     private boolean needsToEat(int at) {
         return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
+    }
+
+
+    private void teleToHouse() {
+        InventoryInteraction.useItem("Teleport to house", "Break");
+        drankSuperCombat = false;
     }
 
     private boolean needsToDrinkPrayer(int at) {
@@ -87,7 +94,7 @@ public class AutoVardorvisPlugin extends Plugin {
             Inventory.search().withAction("Eat").result().stream()
                     .findFirst()
                     .ifPresentOrElse(food -> InventoryInteraction.useItem(food, "Eat"),
-                            () -> InventoryInteraction.useItem("Teleport to house", "Break")
+                            () -> teleToHouse()
                             );
         }
     }
@@ -97,7 +104,7 @@ public class AutoVardorvisPlugin extends Plugin {
             Inventory.search().nameContains("Prayer potion").result().stream()
                     .findFirst()
                     .ifPresentOrElse(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"),
-                            () -> InventoryInteraction.useItem("Teleport to house", "Break")
+                            () -> teleToHouse()
                             );
         }
     }
@@ -196,13 +203,18 @@ public class AutoVardorvisPlugin extends Plugin {
             ) {
                 vardorvis.ifPresent(npc -> {
                     NPCInteraction.interact(npc, "Attack");
+                    if (!drankSuperCombat) {
+                        Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
+                            InventoryInteraction.useItem(potion, "Drink");
+                            drankSuperCombat = true;
+                        });
+                    }
                 });
                 return;
             } else if (vardorvis.get().getWorldLocation().getX() != safeTile.getX() + 1) {
                 movePlayerToTile(safeTile);
             }
         }
-
 
         if (!newAxes.isEmpty()) {
             newAxes.forEach((axe) -> {
@@ -245,9 +257,12 @@ public class AutoVardorvisPlugin extends Plugin {
     }
 
 
+
+    private boolean drankSuperCombat = false;
     @Subscribe
     private void onVarbitChanged(VarbitChanged event) {
         if (event.getVarpId() == Varbits.DIVINE_SUPER_COMBAT) {
+            drankSuperCombat = true;
             if (event.getValue() <= 100000000) {
                 Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
                     InventoryInteraction.useItem(potion, "Drink");
