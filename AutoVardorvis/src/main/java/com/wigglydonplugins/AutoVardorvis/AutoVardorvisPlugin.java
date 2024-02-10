@@ -261,9 +261,9 @@ public class AutoVardorvisPlugin extends Plugin {
     private boolean drankSuperCombat = false;
     @Subscribe
     private void onVarbitChanged(VarbitChanged event) {
-        if (event.getVarpId() == Varbits.DIVINE_SUPER_COMBAT) {
+        if (event.getVarbitId() == Varbits.DIVINE_SUPER_COMBAT) {
             drankSuperCombat = true;
-            if (event.getValue() <= 100000000) {
+            if (event.getValue() <= 10) {
                 Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
                     InventoryInteraction.useItem(potion, "Drink");
                 });
