@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class InventoryInteraction {
-    public static boolean useItem(String name, String... actions) {
+    public static Boolean useItem(String name, String... actions) {
         return Inventory.search().withName(name).first().flatMap(item ->
         {
             MousePackets.queueClickPacket();

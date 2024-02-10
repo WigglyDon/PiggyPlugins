@@ -814,7 +814,7 @@ class AutoVorkathPlugin : Plugin() {
     private fun inHouse(): Boolean = TileObjects.search().nameContains(config.PORTAL().toString()).result().isNotEmpty()
 
     private fun isMoving(): Boolean = EthanApiPlugin.isMoving() || client.localPlayer.animation != -1
-    private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= config.PRAYERAT();
+    private fun needsToDrinkPrayer(): Boolean = client.getBoostedSkillLevel(Skill.PRAYER) <= config.DRINKPRAYERAT();
     private fun readyToFight(): Boolean =
         (Inventory.search().withId(config.FOOD_TYPE().foodId).result().size >= config.FOODAMOUNT().height
                 && Inventory.search().nameContains(config.SLAYERSTAFF().toString()).result().isNotEmpty()

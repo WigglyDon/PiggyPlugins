@@ -8,21 +8,20 @@ import net.runelite.client.config.ConfigItem;
 public interface AutoVardorvisConfig extends Config {
 
     @ConfigItem(
-            keyName = "autoPray",
-            name = "Auto Prayers",
-            description = ""
-    )
-    default boolean autoPray() {
-        return false;
-    }
-
-    @ConfigItem(
-            keyName = "awakened",
-            name = "Awakened Vardorvis",
-            description = "",
+            keyName = "eatat",
+            name = "Eat at",
+            description = "Eat at what health?",
             position = 0
     )
-    default boolean awakened() {
-        return false;
-    }
+    default int EATAT() { return 75; }
+
+    @ConfigItem(
+            keyName = "drinkprayerat",
+            name = "Drink prayer potion at",
+            description = "Drink prayer potion when?",
+            position = 1
+    )
+    default int DRINKPRAYERAT() { return 15; }
+
+
 }

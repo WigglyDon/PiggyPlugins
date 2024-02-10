@@ -9,14 +9,19 @@ import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.ImageComponent;
 
 import com.google.inject.Inject;
+import net.runelite.client.ui.overlay.components.LineComponent;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.TimeUnit;
 
 public class AutoVardorvisOverlay extends OverlayPanel {
 
     private final Client client;
     private final SpriteManager spriteManager;
     private final AutoVardorvisPlugin plugin;
+
+    private double killsPerHour = 0.0;
 
 
     @Inject
@@ -32,21 +37,56 @@ public class AutoVardorvisOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics2D) {
-        if (!plugin.isInFight()) {
-            return null;
-        }
-
         panelComponent.getChildren().clear();
         BufferedImage prayerImage;
         prayerImage = getPrayerImage(plugin.getPrayerSprite());
 
+        LineComponent elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime));
+
+        String killsText;
+        if (killsPerHour != 0.0) {
+            killsText = String.format("%.1f", killsPerHour);
+        } else {
+            killsText = "0.0";
+        }
+
+        LineComponent kills = buildLine("Kills: ", plugin.totalKills + " (" + killsText + " p/h)");
+
+
         panelComponent.setBackgroundColor(client.isPrayerActive(plugin.getCorrectPrayer()) ? Color.GREEN : Color.RED);
         panelComponent.getChildren().add(new ImageComponent(prayerImage));
+        panelComponent.getChildren().add(elapsedTime);
+        panelComponent.getChildren().add(kills);
 
         return super.render(graphics2D);
     }
 
     private BufferedImage getPrayerImage(int spriteId) {
         return spriteManager.getSprite(spriteId, 0);
+    }
+
+    private LineComponent buildLine(String left, String right) {
+        return LineComponent.builder()
+                .left(left)
+                .right(right)
+                .leftColor(Color.WHITE)
+                .rightColor(Color.YELLOW)
+                .build();
+    }
+
+    private String formatTime(Long timeInMillis) {
+        long hours = TimeUnit.MILLISECONDS.toHours(timeInMillis);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(timeInMillis) % 60;
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(timeInMillis) % 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+    public void updateKillsPerHour() {
+        if (plugin.elapsedTime > 0) {
+            killsPerHour = plugin.totalKills / (plugin.elapsedTime / 3600000.0);
+        } else {
+            killsPerHour = 0.0;
+        }
     }
 }

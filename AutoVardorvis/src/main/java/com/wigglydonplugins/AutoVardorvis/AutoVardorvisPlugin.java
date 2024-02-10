@@ -15,10 +15,7 @@ import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.NpcChanged;
-import net.runelite.api.events.NpcSpawned;
-import net.runelite.api.events.ProjectileMoved;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -26,7 +23,6 @@ import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.api.events.AnimationChanged;
 
 import com.google.inject.Inject;
 
@@ -46,6 +42,11 @@ public class AutoVardorvisPlugin extends Plugin {
     private int rangeTicks = 0;
     private int rangeCooldown = 0;
 
+
+    int totalKills = 0;
+    long startTime = System.currentTimeMillis();
+    long elapsedTime = 0;
+
     @Inject
     private Client client;
     @Inject
@@ -64,11 +65,13 @@ public class AutoVardorvisPlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
+        startTime = System.currentTimeMillis();
         overlayManager.add(overlay);
     }
 
     @Override
     protected void shutDown() throws Exception {
+        totalKills = 0;
         overlayManager.remove(overlay);
     }
     private boolean needsToEat(int at) {
@@ -82,7 +85,9 @@ public class AutoVardorvisPlugin extends Plugin {
         if (needsToEat(at)) {
             Inventory.search().withAction("Eat").result().stream()
                     .findFirst()
-                    .ifPresent(food -> InventoryInteraction.useItem(food, "Eat"));
+                    .ifPresentOrElse(food -> InventoryInteraction.useItem(food, "Eat"),
+                            () -> InventoryInteraction.useItem("Teleport to house", "Break")
+                            );
         }
     }
 
@@ -90,7 +95,9 @@ public class AutoVardorvisPlugin extends Plugin {
         if (needsToDrinkPrayer(at)) {
             Inventory.search().nameContains("Prayer potion").result().stream()
                     .findFirst()
-                    .ifPresent(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"));
+                    .ifPresentOrElse(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"),
+                            () -> InventoryInteraction.useItem("Teleport to house", "Break")
+                            );
         }
     }
 
@@ -108,10 +115,7 @@ public class AutoVardorvisPlugin extends Plugin {
                 rangeCooldown--;
             }
         }
-
-        if (config.autoPray()) {
-            handleRangeFirstGameTick();
-        }
+        handleRangeFirstGameTick();
     }
 
     WorldPoint safeTile = null;
@@ -119,7 +123,6 @@ public class AutoVardorvisPlugin extends Plugin {
     private int axeTicks = 0;
 
     private void handleAxeMove() {
-        System.out.println("axeTicks: " + axeTicks);
         switch (axeTicks) {
             case 0:
                 break;
@@ -160,6 +163,11 @@ public class AutoVardorvisPlugin extends Plugin {
     }
     @Subscribe
     private void onGameTick(GameTick event) {
+        long currentTime = System.currentTimeMillis();
+        elapsedTime = currentTime - startTime;
+        overlay.updateKillsPerHour();
+
+
         List<NPC> newAxes = NPCs.search().withId(12225).result();
         List<NPC> activeAxes = NPCs.search().withId(12227).result();
         Optional<NPC> vardorvis = NPCs.search().nameContains(VARDOVIS).first();
@@ -189,8 +197,7 @@ public class AutoVardorvisPlugin extends Plugin {
                     NPCInteraction.interact(npc, "Attack");
                 });
                 return;
-            } else if (vardorvis.get().getWorldLocation().getX() != safeTile.getX() + 1
-            && vardorvis.get().getWorldLocation().getY() != safeTile.getY() - 1) {
+            } else if (vardorvis.get().getWorldLocation().getX() != safeTile.getX() + 1) {
                 movePlayerToTile(safeTile);
             }
         }
@@ -224,8 +231,8 @@ public class AutoVardorvisPlugin extends Plugin {
                 movePlayerToTile(safeTile);
                 return;
             } else {
-                eat(55);
-                drinkPrayer(15);
+                eat(config.EATAT());
+                drinkPrayer(config.DRINKPRAYERAT());
             }
         }
 
@@ -235,27 +242,6 @@ public class AutoVardorvisPlugin extends Plugin {
             });
         }
     }
-
-//    @Subscribe
-//    private void onNpcSpawned(NpcSpawned event) {
-//        System.out.println(event.getNpc().getName() + " spawned");
-//
-//        if (event.getNpc().getId() == 12225) {
-//            if (event.getNpc().getWorldLocation().getX() == safeTile.getX() - 1 && event.getNpc().getWorldLocation().getY() == safeTile.getY() - 1) {
-//                System.out.println("AXE SPAWNED ON PLAYER");
-//                handleAxeMove();
-//            }
-//        }
-//    }
-//    @Subscribe
-//    private void onAnimationChanged(AnimationChanged event) {
-////      List<NPC> activeAxes = NPCs.search().withId(12227).result();
-//        if (event.getActor().getWorldLocation().getX() == safeTile.getX() + 1 && event.getActor().getWorldLocation().getY() == safeTile.getY() - 1) {
-//            System.out.println("AXE RETURNING TO PLAYER");
-//            axeTicks = 1;
-//            handleAxeMove();
-//        }
-//    }
 
     @Subscribe
     private void onProjectileMoved(ProjectileMoved event) {
@@ -273,8 +259,15 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
+    @Subscribe
+    private void onChatMessage(ChatMessage e) {
+        if (e.getMessage().contains("Your Vardorvis kill count is:")) {
+            totalKills ++;
+        }
+    }
+
     /**
-     * 1 tick blood captcha. Thanks @Lunatik
+     * 1 tick blood captcha. Thanks, @Lunatik
      */
     private void doBloodCaptcha() {
         List<Widget> captchaBlood = Widgets.search().filter(widget -> widget.getParentId() != 9764864).hiddenState(false).withAction("Destroy").result();

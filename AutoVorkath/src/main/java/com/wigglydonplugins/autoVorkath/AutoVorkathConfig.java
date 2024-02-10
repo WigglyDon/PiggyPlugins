@@ -132,12 +132,12 @@ public interface AutoVorkathConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "drinkat",
+            keyName = "drinkprayerat",
             name = "Drink prayer potion at",
-            description = "Restore prayer when?",
+            description = "Drink prayer potion when?",
             position = 12
     )
-    default int PRAYERAT() { return 50; }
+    default int DRINKPRAYERAT() { return 15; }
 
     @ConfigItem(
             keyName = "food",
