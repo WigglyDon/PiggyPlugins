@@ -13,6 +13,7 @@ import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
@@ -38,7 +39,6 @@ import java.util.Optional;
 public class AutoVardorvisPlugin extends Plugin {
 
     private static final int RANGE_PROJECTILE = 2521;
-    private static final String VARDOVIS = "Vardorvis";
     private Projectile rangeProjectile;
     private int rangeTicks = 0;
     private int rangeCooldown = 0;
@@ -118,22 +118,7 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
-    private void autoPray() {
-        if (rangeTicks > 0) {
-            rangeTicks--;
-            if (rangeTicks == 0) {
-                rangeCooldown = 3;
-            }
-        }
 
-        if (rangeTicks == 0) {
-            rangeProjectile = null;
-            if (rangeCooldown > 0) {
-                rangeCooldown--;
-            }
-        }
-        handleRangeFirstGameTick();
-    }
 
     WorldPoint safeTile = null;
     WorldPoint axeMoveTile = null;
@@ -158,26 +143,9 @@ public class AutoVardorvisPlugin extends Plugin {
         MovementPackets.queueMovement(tile);
     }
 
-    private void handleRangeFirstGameTick() {
-        if (rangeTicks > 0) {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MISSILES)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-            }
-        } else {
-            if (!PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
-                PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
-            }
-        }
-    }
 
-    private void turnOffPrayers() {
-        if (PrayerUtil.isPrayerActive(Prayer.PIETY)) {
-            PrayerUtil.togglePrayer(Prayer.PIETY);
-        }
-        if (PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
-            PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
-        }
-    }
+
+
 
 
 
@@ -187,28 +155,30 @@ public class AutoVardorvisPlugin extends Plugin {
 
 
     //YEET
-    public class MainClassContext {
+    @Getter
+    public static class MainClassContext {
         private final Client client;
+        private final int rangeTicks;
+        private final int rangeCooldown;
 
-        public MainClassContext(Client client) {
+        public MainClassContext(Client client, int rangeTicks, int rangeCooldown) {
             this.client = client;
+            this.rangeTicks = rangeTicks;
+            this.rangeCooldown = rangeCooldown;
         }
 
-        public Client getClient() {
-            return client;
-        }
     }
-
-    //YEET
 
     private void handleBotState(State botState) {
         if (botState == null) {
             System.out.println("Null state...");
             return;
         }
-        MainClassContext context = new MainClassContext(client);
+        MainClassContext context = new MainClassContext(client, rangeTicks, rangeCooldown);
         StateHandler.handleState(botState, context);
     }
+
+    //YEET
 
     @Subscribe
     private void onGameTick(GameTick event) {
@@ -263,15 +233,7 @@ public class AutoVardorvisPlugin extends Plugin {
     /**
      * 1 tick blood captcha. Thanks, @Lunatik
      */
-    private void doBloodCaptcha() {
-        List<Widget> captchaBlood = Widgets.search().filter(widget -> widget.getParentId() != 9764864).hiddenState(false).withAction("Destroy").result();
-        if (!captchaBlood.isEmpty()) {
-            captchaBlood.forEach(x -> {
-                MousePackets.queueClickPacket();
-                WidgetPackets.queueWidgetAction(x, "Destroy");
-            });
-        }
-    }
+
 
     public int getPrayerSprite() {
         if (rangeTicks > 0) {
