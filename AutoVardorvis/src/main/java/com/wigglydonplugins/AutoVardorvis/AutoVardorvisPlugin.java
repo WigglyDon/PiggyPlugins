@@ -77,7 +77,6 @@ public class AutoVardorvisPlugin extends Plugin {
     }
     private void eat(int at) {
         if (needsToEat(at)) {
-            System.out.println("ATE FOOD");
             Inventory.search().withAction("Eat").result().stream()
                     .findFirst()
                     .ifPresent(food -> InventoryInteraction.useItem(food, "Eat"));
@@ -86,7 +85,6 @@ public class AutoVardorvisPlugin extends Plugin {
 
     private void drinkPrayer(int at) {
         if (needsToDrinkPrayer(at)) {
-            System.out.println("DRANK POT");
             Inventory.search().nameContains("Prayer potion").result().stream()
                     .findFirst()
                     .ifPresent(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"));
@@ -121,16 +119,16 @@ public class AutoVardorvisPlugin extends Plugin {
         System.out.println("axe ticks: " + axeTicks);
         switch (axeTicks) {
             case 0:
-
                 break;
             case 1:
                 movePlayerToTile(axeMoveTile);
                 break;
-            case 2:
-                movePlayerToTile(safeTile);
-                break;
         }
-        axeTicks ++;
+        if (axeTicks == 1) {
+            axeTicks = 0;
+        } else {
+            axeTicks++;
+        }
     }
     private void movePlayerToTile(WorldPoint tile) {
         MousePackets.queueClickPacket();
@@ -202,16 +200,19 @@ public class AutoVardorvisPlugin extends Plugin {
 
         if (!newAxes.isEmpty()) {
             newAxes.forEach((axe) -> {
-                if (axe.getWorldLocation().getX() + 1 == safeTile.getX() && axe.getWorldLocation().getY() + 1 == safeTile.getY()) {
+                if (axe.getWorldLocation().getX() == safeTile.getX() - 1 && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
                     handleAxeMove();
-                } else {
-                    axeTicks = 0;
                 }
             });
         }
 
         if (!activeAxes.isEmpty()) {
-//            System.out.println("activeAxes: " + activeAxes);
+            activeAxes.forEach((axe) -> {
+                if (axe.getWorldLocation().getX() == safeTile.getX() + 1 && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
+                    axeTicks = 1;
+                    handleAxeMove();
+                }
+            });
         }
     }
 
