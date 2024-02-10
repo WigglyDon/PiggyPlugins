@@ -85,86 +85,22 @@ public class AutoVardorvisPlugin extends Plugin {
         running = false;
         botState = null;
     }
-    private boolean needsToEat(int at) {
-        return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
-    }
-
-
-    private void teleToHouse() {
-        InventoryInteraction.useItem("Teleport to house", "Break");
-        drankSuperCombat = false;
-    }
-
-    private boolean needsToDrinkPrayer(int at) {
-        return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
-    }
-    private void eat(int at) {
-        if (needsToEat(at)) {
-            Inventory.search().withAction("Eat").result().stream()
-                    .findFirst()
-                    .ifPresentOrElse(food -> InventoryInteraction.useItem(food, "Eat"),
-                            () -> teleToHouse()
-                            );
-        }
-    }
-
-    private void drinkPrayer(int at) {
-        if (needsToDrinkPrayer(at)) {
-            Inventory.search().nameContains("Prayer potion").result().stream()
-                    .findFirst()
-                    .ifPresentOrElse(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"),
-                            () -> teleToHouse()
-                            );
-        }
-    }
-
-
-
-    WorldPoint safeTile = null;
-    WorldPoint axeMoveTile = null;
-    private int axeTicks = 0;
-
-    private void handleAxeMove() {
-        switch (axeTicks) {
-            case 0:
-                break;
-            case 1:
-                movePlayerToTile(axeMoveTile);
-                break;
-        }
-        if (axeTicks == 1) {
-            axeTicks = 0;
-        } else {
-            axeTicks++;
-        }
-    }
-    private void movePlayerToTile(WorldPoint tile) {
-        MousePackets.queueClickPacket();
-        MovementPackets.queueMovement(tile);
-    }
-
-
-
-
-
-
-
-
-
-
-
 
     //YEET
     @Getter
     public static class MainClassContext {
         private final Client client;
+        private final AutoVardorvisConfig config;
         private final int rangeTicks;
         private final int rangeCooldown;
+        private final boolean drankSuperCombat;
 
-        public MainClassContext(Client client, int rangeTicks, int rangeCooldown) {
+        public MainClassContext(Client client, AutoVardorvisConfig config, int rangeTicks, int rangeCooldown, boolean drankSuperCombat) {
             this.client = client;
+            this.config = config;
             this.rangeTicks = rangeTicks;
             this.rangeCooldown = rangeCooldown;
+            this.drankSuperCombat = drankSuperCombat;
         }
 
     }
@@ -174,7 +110,7 @@ public class AutoVardorvisPlugin extends Plugin {
             System.out.println("Null state...");
             return;
         }
-        MainClassContext context = new MainClassContext(client, rangeTicks, rangeCooldown);
+        MainClassContext context = new MainClassContext(client, config, rangeTicks, rangeCooldown, drankSuperCombat);
         StateHandler.handleState(botState, context);
     }
 

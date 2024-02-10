@@ -7,8 +7,10 @@ import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
+import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
+import com.wigglydonplugins.AutoVardorvis.AutoVardorvisConfig;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 
@@ -21,13 +23,21 @@ import net.runelite.api.widgets.Widget;
 public class FightingState {
 
     private static final String VARDORVIS = "Vardorvis";
+    private static Client client;
+    private static AutoVardorvisConfig config;
     private static int rangeTicks;
     private static int rangeCooldown;
+    static WorldPoint safeTile = null;
+    private static boolean drankSuperCombat;
+    static WorldPoint axeMoveTile = null;
+    private static int axeTicks = 0;
 
     public static void execute(MainClassContext context) {
-        Client client = context.getClient();
+        client = context.getClient();
+        config = context.getConfig();
         rangeTicks = context.getRangeTicks();
         rangeCooldown = context.getRangeCooldown();
+        drankSuperCombat = context.isDrankSuperCombat();
 
 
         System.out.println("fighting state");
@@ -113,6 +123,24 @@ public class FightingState {
 
 
     }
+    private static void handleAxeMove() {
+        switch (axeTicks) {
+            case 0:
+                break;
+            case 1:
+                movePlayerToTile(axeMoveTile);
+                break;
+        }
+        if (axeTicks == 1) {
+            axeTicks = 0;
+        } else {
+            axeTicks++;
+        }
+    }
+    private static void movePlayerToTile(WorldPoint tile) {
+        MousePackets.queueClickPacket();
+        MovementPackets.queueMovement(tile);
+    }
     private static void doBloodCaptcha() {
         List<Widget> captchaBlood = Widgets.search().filter(widget -> widget.getParentId() != 9764864).hiddenState(false).withAction("Destroy").result();
         if (!captchaBlood.isEmpty()) {
@@ -158,6 +186,38 @@ public class FightingState {
                 PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
             }
         }
+    }
+    private static void eat(int at) {
+        if (needsToEat(at)) {
+            Inventory.search().withAction("Eat").result().stream()
+                    .findFirst()
+                    .ifPresentOrElse(food -> InventoryInteraction.useItem(food, "Eat"),
+                            () -> teleToHouse()
+                    );
+        }
+    }
+
+    private static void drinkPrayer(int at) {
+        if (needsToDrinkPrayer(at)) {
+            Inventory.search().nameContains("Prayer potion").result().stream()
+                    .findFirst()
+                    .ifPresentOrElse(prayerPotion -> InventoryInteraction.useItem(prayerPotion, "Drink"),
+                            () -> teleToHouse()
+                    );
+        }
+    }
+    private static boolean needsToEat(int at) {
+        return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
+    }
+
+
+    private static void teleToHouse() {
+        InventoryInteraction.useItem("Teleport to house", "Break");
+        drankSuperCombat = false;
+    }
+
+    private static boolean needsToDrinkPrayer(int at) {
+        return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
     }
 }
 
