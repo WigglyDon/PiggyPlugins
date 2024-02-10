@@ -24,6 +24,8 @@ public class AutoVardorvisOverlay extends OverlayPanel {
     private double killsPerHour = 0.0;
 
 
+
+
     @Inject
     private AutoVardorvisOverlay(Client client, SpriteManager spriteManager, AutoVardorvisPlugin plugin) {
         super(plugin);
@@ -37,19 +39,19 @@ public class AutoVardorvisOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics2D) {
-        panelComponent.getChildren().clear();
-
-        LineComponent elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime));
-
         String killsText;
         if (killsPerHour != 0.0) {
             killsText = String.format("%.1f", killsPerHour);
         } else {
             killsText = "0.0";
         }
+        panelComponent.getChildren().clear();
 
+        LineComponent elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime));
         LineComponent kills = buildLine("Kills: ", plugin.totalKills + " (" + killsText + " p/h)");
-        
+        LineComponent tickDelay = buildLine("Tick Delay: ", Integer.toString(plugin.tickDelay));
+
+        panelComponent.getChildren().add(tickDelay);
         panelComponent.getChildren().add(elapsedTime);
         panelComponent.getChildren().add(kills);
 

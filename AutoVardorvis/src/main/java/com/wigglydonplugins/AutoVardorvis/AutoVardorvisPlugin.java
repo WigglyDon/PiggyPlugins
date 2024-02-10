@@ -47,6 +47,11 @@ public class AutoVardorvisPlugin extends Plugin {
     int totalKills = 0;
     long startTime = System.currentTimeMillis();
     long elapsedTime = 0;
+    boolean running = false;
+    int tickDelay = 0;
+
+    State botState = null;
+    private boolean drankSuperCombat = false;
 
     @Inject
     private Client client;
@@ -68,6 +73,8 @@ public class AutoVardorvisPlugin extends Plugin {
     protected void startUp() throws Exception {
         startTime = System.currentTimeMillis();
         overlayManager.add(overlay);
+        running = client.getGameState() == GameState.LOGGED_IN;
+        botState = State.TESTING;
     }
 
     @Override
@@ -75,6 +82,8 @@ public class AutoVardorvisPlugin extends Plugin {
         totalKills = 0;
         overlayManager.remove(overlay);
         drankSuperCombat = false;
+        running = false;
+        botState = null;
     }
     private boolean needsToEat(int at) {
         return client.getBoostedSkillLevel(Skill.HITPOINTS) <= at;
@@ -169,11 +178,43 @@ public class AutoVardorvisPlugin extends Plugin {
             PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
         }
     }
+
+    public enum State {
+        TESTING,
+        FIGHTING,
+
+    }
+
+    private void handleBotState(State botState) {
+        if (botState == null) {
+            System.out.println("Null state...");
+            return;
+        }
+        switch (botState) {
+            case TESTING:
+                testingState();
+                break;
+            case FIGHTING:
+                fightingState();
+                break;
+        }
+    }
+
     @Subscribe
     private void onGameTick(GameTick event) {
         long currentTime = System.currentTimeMillis();
         elapsedTime = currentTime - startTime;
         overlay.updateKillsPerHour();
+
+
+        if (running) {
+            if (tickDelay > 0) {
+                tickDelay --;
+                return;
+            }
+
+            handleBotState(botState);
+        }
 
 
         List<NPC> newAxes = NPCs.search().withId(12225).result();
@@ -257,8 +298,15 @@ public class AutoVardorvisPlugin extends Plugin {
     }
 
 
+    private void testingState() {
+        System.out.println("Testing state");
+    }
 
-    private boolean drankSuperCombat = false;
+    private void fightingState() {
+        System.out.println("Fightning state");
+    }
+
+
     @Subscribe
     private void onVarbitChanged(VarbitChanged event) {
         if (event.getVarbitId() == Varbits.DIVINE_SUPER_COMBAT) {
