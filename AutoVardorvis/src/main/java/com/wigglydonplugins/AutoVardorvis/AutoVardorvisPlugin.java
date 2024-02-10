@@ -4,7 +4,6 @@ import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
-import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
@@ -12,9 +11,10 @@ import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
 import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
+import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
+import com.wigglydonplugins.AutoVardorvis.state.StateHandler;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.annotations.Varbit;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
@@ -74,7 +74,7 @@ public class AutoVardorvisPlugin extends Plugin {
         startTime = System.currentTimeMillis();
         overlayManager.add(overlay);
         running = client.getGameState() == GameState.LOGGED_IN;
-        botState = State.TESTING;
+        botState = State.FIGHTING;
     }
 
     @Override
@@ -179,25 +179,35 @@ public class AutoVardorvisPlugin extends Plugin {
         }
     }
 
-    public enum State {
-        TESTING,
-        FIGHTING,
 
+
+
+
+
+
+
+    //YEET
+    public class MainClassContext {
+        private final Client client;
+
+        public MainClassContext(Client client) {
+            this.client = client;
+        }
+
+        public Client getClient() {
+            return client;
+        }
     }
+
+    //YEET
 
     private void handleBotState(State botState) {
         if (botState == null) {
             System.out.println("Null state...");
             return;
         }
-        switch (botState) {
-            case TESTING:
-                testingState();
-                break;
-            case FIGHTING:
-                fightingState();
-                break;
-        }
+        MainClassContext context = new MainClassContext(client);
+        StateHandler.handleState(botState, context);
     }
 
     @Subscribe
@@ -206,106 +216,14 @@ public class AutoVardorvisPlugin extends Plugin {
         elapsedTime = currentTime - startTime;
         overlay.updateKillsPerHour();
 
-
         if (running) {
             if (tickDelay > 0) {
-                tickDelay --;
+                tickDelay--;
                 return;
             }
-
             handleBotState(botState);
         }
-
-
-        List<NPC> newAxes = NPCs.search().withId(12225).result();
-        List<NPC> activeAxes = NPCs.search().withId(12227).result();
-        Optional<NPC> vardorvis = NPCs.search().nameContains(VARDOVIS).first();
-
-        WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
-        Optional<TileObject> safeRock =TileObjects.search().withAction("Leave").first();
-
-        if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
-            turnOffPrayers();
-            return;
-        }
-
-        autoPray();
-        if (!PrayerUtil.isPrayerActive(Prayer.PIETY)) {
-            PrayerUtil.togglePrayer(Prayer.PIETY);
-        }
-        doBloodCaptcha();
-
-
-        //initial attack
-        if (vardorvis.isPresent() && safeTile != null) {
-            if (vardorvis.get().getWorldLocation().getX() == safeTile.getX() + 4
-                    && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
-                    && vardorvis.get().getAnimation() == -1
-            ) {
-                vardorvis.ifPresent(npc -> {
-                    NPCInteraction.interact(npc, "Attack");
-                    if (!drankSuperCombat) {
-                        Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
-                            InventoryInteraction.useItem(potion, "Drink");
-                            drankSuperCombat = true;
-                        });
-                    }
-                });
-                return;
-            } else if (vardorvis.get().getWorldLocation().getX() != safeTile.getX() + 1) {
-                movePlayerToTile(safeTile);
-            }
-        }
-
-        if (!newAxes.isEmpty()) {
-            newAxes.forEach((axe) -> {
-                if (axe.getWorldLocation().getX() == safeTile.getX() - 1 && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
-                    handleAxeMove();
-                }
-            });
-        }
-
-        if (!activeAxes.isEmpty()) {
-            activeAxes.forEach((axe) -> {
-                if (axe.getWorldLocation().getX() == safeTile.getX() + 1 && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
-                    axeTicks = 1;
-                    handleAxeMove();
-                }
-            });
-        }
-
-        if (safeRock.isPresent()) {
-            WorldPoint safeRockLocation = safeRock.get().getWorldLocation();
-            safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
-            axeMoveTile = new WorldPoint(safeTile.getX() + 2, safeTile.getY() - 2, 0);
-        }
-
-        if (safeTile != null) {
-            if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
-                movePlayerToTile(safeTile);
-                return;
-            } else {
-                eat(config.EATAT());
-                drinkPrayer(config.DRINKPRAYERAT());
-            }
-        }
-
-        if (!client.getLocalPlayer().isInteracting()) {
-            NPCs.search().nameContains(VARDOVIS).first().ifPresent(npc -> {
-                NPCInteraction.interact(npc, "Attack");
-            });
-        }
     }
-
-
-    private void testingState() {
-        System.out.println("Testing state");
-    }
-
-    private void fightingState() {
-        System.out.println("Fightning state");
-    }
-
 
     @Subscribe
     private void onVarbitChanged(VarbitChanged event) {
@@ -321,7 +239,7 @@ public class AutoVardorvisPlugin extends Plugin {
 
     @Subscribe
     private void onProjectileMoved(ProjectileMoved event) {
-        if (client.getGameState() != GameState.LOGGED_IN || !isInFight()) {
+        if (client.getGameState() != GameState.LOGGED_IN) {
             return;
         }
 
@@ -369,9 +287,5 @@ public class AutoVardorvisPlugin extends Plugin {
         }
 
         return Prayer.PROTECT_FROM_MELEE;
-    }
-
-    public boolean isInFight() {
-        return client.isInInstancedRegion() && NPCs.search().nameContains(VARDOVIS).nearestToPlayer().isPresent();
     }
 }

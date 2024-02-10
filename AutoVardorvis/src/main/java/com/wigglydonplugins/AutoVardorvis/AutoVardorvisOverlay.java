@@ -47,10 +47,12 @@ public class AutoVardorvisOverlay extends OverlayPanel {
         }
         panelComponent.getChildren().clear();
 
+        LineComponent botState = buildLine("State: ", plugin.botState.toString());
         LineComponent elapsedTime = buildLine("Runtime: ", formatTime(plugin.elapsedTime));
         LineComponent kills = buildLine("Kills: ", plugin.totalKills + " (" + killsText + " p/h)");
         LineComponent tickDelay = buildLine("Tick Delay: ", Integer.toString(plugin.tickDelay));
 
+        panelComponent.getChildren().add(botState);
         panelComponent.getChildren().add(tickDelay);
         panelComponent.getChildren().add(elapsedTime);
         panelComponent.getChildren().add(kills);
