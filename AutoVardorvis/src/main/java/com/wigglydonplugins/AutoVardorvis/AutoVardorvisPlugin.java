@@ -70,7 +70,7 @@ public class AutoVardorvisPlugin extends Plugin {
     startTime = System.currentTimeMillis();
     overlayManager.add(overlay);
     running = client.getGameState() == GameState.LOGGED_IN;
-    botState = State.FIGHTING;
+    botState = State.TESTING;
   }
 
   @Override
