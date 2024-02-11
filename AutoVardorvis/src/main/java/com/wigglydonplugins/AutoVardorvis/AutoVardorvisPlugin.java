@@ -109,7 +109,6 @@ public class AutoVardorvisPlugin extends Plugin {
 
   @Subscribe
   private void onGameTick(GameTick event) {
-
     long currentTime = System.currentTimeMillis();
     elapsedTime = currentTime - startTime;
     overlay.updateKillsPerHour();
@@ -143,9 +142,7 @@ public class AutoVardorvisPlugin extends Plugin {
     if (client.getGameState() != GameState.LOGGED_IN) {
       return;
     }
-
     Projectile projectile = event.getProjectile();
-
     if (projectile.getId() == RANGE_PROJECTILE) {
       if (rangeProjectile == null && rangeCooldown == 0) {
         rangeTicks = 4;
@@ -163,6 +160,7 @@ public class AutoVardorvisPlugin extends Plugin {
     }
 
     if (rangeTicks == 0) {
+      rangeProjectile = null;
       if (rangeCooldown > 0) {
         rangeCooldown--;
       }
