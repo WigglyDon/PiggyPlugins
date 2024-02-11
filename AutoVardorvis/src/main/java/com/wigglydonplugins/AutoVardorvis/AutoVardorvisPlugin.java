@@ -22,7 +22,6 @@ import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -52,8 +51,6 @@ public class AutoVardorvisPlugin extends Plugin {
   @Inject
   private Client client;
   @Inject
-  private SpriteManager spriteManager;
-  @Inject
   private OverlayManager overlayManager;
   @Inject
   private AutoVardorvisOverlay overlay;
@@ -70,7 +67,7 @@ public class AutoVardorvisPlugin extends Plugin {
     startTime = System.currentTimeMillis();
     overlayManager.add(overlay);
     running = client.getGameState() == GameState.LOGGED_IN;
-    botState = State.TESTING;
+    botState = State.BANKING;
   }
 
   @Override
