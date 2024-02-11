@@ -115,8 +115,6 @@ public class AutoVardorvisPlugin extends Plugin {
     elapsedTime = currentTime - startTime;
     overlay.updateKillsPerHour();
 
-    System.out.println("real tick delay: " + tickDelay);
-
     if (running) {
       if (tickDelay > 0) {
         tickDelay--;
