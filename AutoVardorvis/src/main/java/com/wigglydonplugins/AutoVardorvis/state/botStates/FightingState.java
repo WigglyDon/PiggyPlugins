@@ -72,7 +72,8 @@ public class FightingState {
           }
         });
         return;
-      } else if (vardorvis.get().getWorldLocation().getX() != safeTile.getX() + 1) {
+      } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
+        System.out.println("vardorvis stuck");
         movePlayerToTile(safeTile);
       }
     }
