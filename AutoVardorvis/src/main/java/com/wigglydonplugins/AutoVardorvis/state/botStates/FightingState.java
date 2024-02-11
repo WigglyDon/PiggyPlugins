@@ -4,6 +4,7 @@ import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
+import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
@@ -61,19 +62,27 @@ public class FightingState {
           && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
           && vardorvis.get().getAnimation() == -1
       ) {
-        vardorvis.ifPresent(npc -> {
-          NPCInteraction.interact(npc, "Attack");
-          if (!drankSuperCombat) {
-            Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
-              InventoryInteraction.useItem(potion, "Drink");
-              drankSuperCombat = true;
-              context.setDrankSuperCombat(true);
-            });
-          }
-        });
-        return;
+        if (config.MIN_FOOD() <= Inventory.search().withAction("Eat")
+            .result()
+            .size() && config.MIN_PRAYER_POTIONS() <= Inventory.search()
+            .nameContains("Prayer potion").result().size()) {
+          vardorvis.ifPresent(npc -> {
+            NPCInteraction.interact(npc, "Attack");
+            if (!drankSuperCombat) {
+              Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
+                InventoryInteraction.useItem(potion, "Drink");
+                drankSuperCombat = true;
+                context.setDrankSuperCombat(true);
+              });
+            }
+          });
+          return;
+        } else {
+          EthanApiPlugin.sendClientMessage("Not enough food/ppots for another kill.");
+          teleToHouse();
+        }
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
-        System.out.println("vardorvis stuck");
+        EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
       }
     }
@@ -195,6 +204,7 @@ public class FightingState {
 
 
   private void teleToHouse() {
+    EthanApiPlugin.sendClientMessage("No HP or Prayer. Teleporting away!");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
   }
