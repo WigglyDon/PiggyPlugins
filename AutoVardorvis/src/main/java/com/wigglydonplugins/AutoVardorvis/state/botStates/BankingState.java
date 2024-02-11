@@ -9,11 +9,13 @@ import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
 public class BankingState {
 
   public void execute(MainClassContext context) {
+    int tickDelay = context.getContextTickDelay();
     if (!Bank.isOpen()) {
       System.out.println("trying to open bank");
       NPCs.search().nameContains("Jack").nearestToPlayer().ifPresent(banker ->
           NPCInteraction.interact(banker, "Bank")
       );
+      context.setContextTickDelay(3);
     } else if (Bank.isOpen()) {
       System.out.println("bank open, trying to withdraw");
       if (Inventory.getItemAmount("Ring of shadows") == 0) {
@@ -21,5 +23,4 @@ public class BankingState {
       }
     }
   }
-
 }

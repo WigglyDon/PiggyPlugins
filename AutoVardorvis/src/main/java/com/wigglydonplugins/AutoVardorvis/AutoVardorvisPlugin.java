@@ -85,23 +85,28 @@ public class AutoVardorvisPlugin extends Plugin {
 
     private Client client;
     private AutoVardorvisConfig config;
+    private int contextTickDelay;
     private boolean drankSuperCombat;
 
-    public MainClassContext(Client client, AutoVardorvisConfig config, boolean drankSuperCombat) {
+    public MainClassContext(Client client, AutoVardorvisConfig config, int passedTickDelay,
+        boolean drankSuperCombat) {
       this.client = client;
       this.config = config;
+      this.contextTickDelay = passedTickDelay;
       this.drankSuperCombat = drankSuperCombat;
     }
   }
 
-  private void handleBotState(State botState) {
+  private void handleBotState(State botState, int passedTickDelay) {
     if (botState == null) {
       System.out.println("Null state...");
       return;
     }
-    MainClassContext context = new MainClassContext(client, config, drankSuperCombat);
+    MainClassContext context = new MainClassContext(client, config, passedTickDelay,
+        drankSuperCombat);
     StateHandler stateHandler = new StateHandler();
     stateHandler.handleState(botState, context);
+    tickDelay = context.getContextTickDelay();
   }
 
   @Subscribe
@@ -110,12 +115,14 @@ public class AutoVardorvisPlugin extends Plugin {
     elapsedTime = currentTime - startTime;
     overlay.updateKillsPerHour();
 
+    System.out.println("real tick delay: " + tickDelay);
+
     if (running) {
       if (tickDelay > 0) {
         tickDelay--;
         return;
       }
-      handleBotState(botState);
+      handleBotState(botState, tickDelay);
       if (isInFight()) {
         autoPray();
       }
