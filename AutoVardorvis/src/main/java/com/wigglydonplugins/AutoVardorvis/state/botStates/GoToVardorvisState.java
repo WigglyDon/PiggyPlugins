@@ -30,7 +30,7 @@ public class GoToVardorvisState {
       context.setContextBotState(State.FIGHTING);
     }
 
-    if (tunnel2.isPresent()) {
+    tunnel2.ifPresent((t2) -> {
       WorldPoint tunnel2Location = new WorldPoint(
           tunnel2.get().getWorldLocation().getX() - 25,
           tunnel2.get().getWorldLocation().getY() + 3,
@@ -44,19 +44,22 @@ public class GoToVardorvisState {
           System.out.println("tunnel 2 too close");
           MousePackets.queueClickPacket();
           MovementPackets.queueMovement(tunnel2Location);
-          return;
+        } else {
+          if (inStrangleWood && !isMoving()) {
+            vardorvisRock.ifPresentOrElse((rock) -> {
+              System.out.println("click climb over");
+              TileObjectInteraction.interact(rock, "Climb-over");
+            }, () -> {
+              tunnel1.ifPresent((t1) -> {
+                System.out.println("click tunnel");
+                TileObjectInteraction.interact(t1, "Enter");
+              });
+            });
+          }
         }
       }
-      vardorvisRock.ifPresentOrElse((rock) -> {
-        System.out.println("click climb over");
-        TileObjectInteraction.interact(rock, "Climb-over");
-      }, () -> {
-        tunnel1.ifPresent((t) -> {
-          System.out.println("click tunnel");
-          TileObjectInteraction.interact(t, "Enter");
-        });
-      });
-    }
+    });
+
   }
 
   private boolean isMoving() {

@@ -42,6 +42,8 @@ public class GoToBankState {
       pool.ifPresent(poolObject -> {
         TileObjectInteraction.interact(poolObject, "Drink");
       });
+      System.out.println("trying to drink pool");
+      context.setContextTickDelay(3);
       return;
     }
     if (inHouse()) {

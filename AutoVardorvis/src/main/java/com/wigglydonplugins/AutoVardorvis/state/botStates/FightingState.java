@@ -62,14 +62,15 @@ public class FightingState {
     if (!PrayerUtil.isPrayerActive(Prayer.PIETY)) {
       PrayerUtil.togglePrayer(Prayer.PIETY);
     }
+
     doBloodCaptcha();
+
     //initial attack
     if (vardorvis.isPresent() && safeTile != null) {
       if (vardorvis.get().getWorldLocation().getX() == safeTile.getX() + 4
           && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
           && vardorvis.get().getAnimation() == -1
       ) {
-
         if (config.MIN_FOOD() <= Inventory.search().withAction("Eat")
             .result()
             .size() && config.MIN_PRAYER_POTIONS() <= Inventory.search()
@@ -86,8 +87,9 @@ public class FightingState {
           });
           return;
         } else {
-          EthanApiPlugin.sendClientMessage("Not enough food/ppots for another kill.");
           teleToHouse();
+          context.setContextTickDelay(3);
+          return;
         }
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
@@ -139,7 +141,6 @@ public class FightingState {
   }
 
   private void handleAxeMove() {
-
     switch (axeTicks) {
 
       case 0:
@@ -215,6 +216,8 @@ public class FightingState {
     EthanApiPlugin.sendClientMessage("No HP or Prayer. Teleporting away!");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
+    safeTile = null;
+    axeMoveTile = null;
     context.setContextBotState(State.GO_TO_BANK);
   }
 
