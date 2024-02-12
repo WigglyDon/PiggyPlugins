@@ -3,6 +3,8 @@ package com.wigglydonplugins.AutoVardorvis.state;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
 import com.wigglydonplugins.AutoVardorvis.state.botStates.BankingState;
 import com.wigglydonplugins.AutoVardorvis.state.botStates.FightingState;
+import com.wigglydonplugins.AutoVardorvis.state.botStates.GoToBankState;
+import com.wigglydonplugins.AutoVardorvis.state.botStates.GoToVardorvisState;
 import com.wigglydonplugins.AutoVardorvis.state.botStates.TestingState;
 
 public class StateHandler {
@@ -26,7 +28,12 @@ public class StateHandler {
       case FIGHTING:
         new FightingState().execute(context);
         break;
-
+      case GO_TO_VARDORVIS:
+        new GoToVardorvisState().execute(context);
+        break;
+      case GO_TO_BANK:
+        new GoToBankState().execute(context);
+        break;
       default:
         System.out.println("Unknown state!");
     }

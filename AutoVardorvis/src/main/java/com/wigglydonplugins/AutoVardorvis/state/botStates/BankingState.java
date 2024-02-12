@@ -30,7 +30,8 @@ public class BankingState {
     int tickDelay = context.getContextTickDelay();
     this.config = context.getConfig();
     this.client = context.getClient();
-    if (preparedForTrip() && !Bank.isOpen()) {
+    if (preparedForTrip() && !Bank.isOpen() && NPCs.search().nameContains("Jack").nearestToPlayer()
+        .isPresent()) {
       Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
         System.out.println("closing withdraw x");
         client.runScript(299, 1, 0, 0);

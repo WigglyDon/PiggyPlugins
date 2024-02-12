@@ -67,7 +67,7 @@ public class AutoVardorvisPlugin extends Plugin {
     startTime = System.currentTimeMillis();
     overlayManager.add(overlay);
     running = client.getGameState() == GameState.LOGGED_IN;
-    botState = State.BANKING;
+    botState = State.GO_TO_BANK;
   }
 
   @Override
@@ -120,7 +120,7 @@ public class AutoVardorvisPlugin extends Plugin {
         tickDelay--;
         return;
       }
-      System.out.println("loc: " + client.getLocalPlayer().getWorldLocation());
+
       handleBotState(botState, tickDelay);
       if (isInFight()) {
         autoPray();
