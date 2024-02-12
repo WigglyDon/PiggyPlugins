@@ -120,6 +120,7 @@ public class AutoVardorvisPlugin extends Plugin {
         tickDelay--;
         return;
       }
+      System.out.println("loc: " + client.getLocalPlayer().getWorldLocation());
       handleBotState(botState, tickDelay);
       if (isInFight()) {
         autoPray();

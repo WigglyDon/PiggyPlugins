@@ -47,5 +47,15 @@ public interface AutoVardorvisConfig extends Config {
     return 1;
   }
 
+  @ConfigItem(
+      keyName = "ppotsToBring",
+      name = "ppots to bring",
+      description = "how many ppots to bring?",
+      position = 3
+  )
+  default int PPOTS_TO_BRING() {
+    return 3;
+  }
+
 
 }
