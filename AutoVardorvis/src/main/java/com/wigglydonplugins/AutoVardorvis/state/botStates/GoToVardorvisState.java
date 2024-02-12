@@ -4,11 +4,14 @@ import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.TileObjectInteraction;
+import com.example.Packets.MousePackets;
+import com.example.Packets.MovementPackets;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import java.util.Optional;
 import net.runelite.api.Client;
 import net.runelite.api.TileObject;
+import net.runelite.api.coords.WorldPoint;
 
 public class GoToVardorvisState {
 
@@ -17,18 +20,33 @@ public class GoToVardorvisState {
   public void execute(MainClassContext context) {
     this.context = context;
     boolean inStrangleWood = TileObjects.search().withId(48723).first().isPresent();
+    Optional<TileObject> vardorvisRock = TileObjects.search().withId(49495).first();
+    Optional<TileObject> tunnel1 = TileObjects.search().withId(48745).first();
+    Optional<TileObject> tunnel2 = TileObjects.search().withId(48746).first();
+    WorldPoint playerLocation = context.getClient().getLocalPlayer().getWorldLocation();
 
     if (isInFight(context.getClient())) {
       System.out.println("changing to FightingState");
       context.setContextBotState(State.FIGHTING);
     }
 
-    Optional<TileObject> vardorvisRock = TileObjects.search().withId(49495)
-        .withinDistance(37).first();
-    Optional<TileObject> tunnel1 = TileObjects.search().withId(48745).first();
-    Optional<TileObject> tunnel2 = TileObjects.search().withId(48746).first();
-
-    if (inStrangleWood && !isMoving()) {
+    if (tunnel2.isPresent()) {
+      WorldPoint tunnel2Location = new WorldPoint(
+          tunnel2.get().getWorldLocation().getX() - 25,
+          tunnel2.get().getWorldLocation().getY() + 3,
+          0);
+      if (inStrangleWood && !isMoving()
+          || playerLocation.getX() == tunnel2Location.getX()
+          && playerLocation.getY() == tunnel2Location.getY()
+      ) {
+        if (tunnel2.get().getWorldLocation()
+            .distanceTo(playerLocation) <= 20) {
+          System.out.println("tunnel 2 too close");
+          MousePackets.queueClickPacket();
+          MovementPackets.queueMovement(tunnel2Location);
+          return;
+        }
+      }
       vardorvisRock.ifPresentOrElse((rock) -> {
         System.out.println("click climb over");
         TileObjectInteraction.interact(rock, "Climb-over");

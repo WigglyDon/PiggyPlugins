@@ -4,10 +4,12 @@ import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.TileObjectInteraction;
+import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import java.util.Optional;
 import net.runelite.api.Client;
+import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
 import net.runelite.api.TileObject;
 
@@ -18,10 +20,15 @@ public class GoToBankState {
   public void execute(MainClassContext context) {
     this.client = context.getClient();
 
+    if (PrayerUtil.isPrayerActive(Prayer.PIETY)) {
+      PrayerUtil.togglePrayer(Prayer.PIETY);
+    }
+    if (PrayerUtil.isPrayerActive(Prayer.PROTECT_FROM_MELEE)) {
+      PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
+    }
     if (NPCs.search().nameContains("Jack").nearestToPlayer().isPresent()) {
       System.out.println("changing to BankingState");
       context.setContextBotState(State.BANKING);
-      context.setContextTickDelay(5);
       return;
     }
     if (!inHouse()) {

@@ -2,6 +2,7 @@ package com.wigglydonplugins.AutoVardorvis.state.botStates;
 
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
+import com.example.EthanApiPlugin.Collections.TileItems;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.EthanApiPlugin.EthanApiPlugin;
@@ -33,22 +34,25 @@ public class FightingState {
   private static WorldPoint axeMoveTile = null;
   private boolean drankSuperCombat;
   private static int axeTicks = 0;
-
   private MainClassContext context;
 
   public void execute(MainClassContext context) {
     client = context.getClient();
     this.context = context;
     AutoVardorvisConfig config = context.getConfig();
-
     drankSuperCombat = context.isDrankSuperCombat();
-
     List<NPC> newAxes = NPCs.search().withId(12225).result();
     List<NPC> activeAxes = NPCs.search().withId(12227).result();
     Optional<NPC> vardorvis = NPCs.search().nameContains(VARDORVIS).first();
-
     WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
     Optional<TileObject> safeRock = TileObjects.search().withAction("Leave").first();
+
+    if (!TileItems.search().empty()) {
+      TileItems.search().first().ifPresent((item) -> {
+        item.interact(false);
+      });
+      return;
+    }
 
     if (client.getGameState() != GameState.LOGGED_IN || !isInFight(client)) {
       turnOffPrayers();
@@ -59,13 +63,13 @@ public class FightingState {
       PrayerUtil.togglePrayer(Prayer.PIETY);
     }
     doBloodCaptcha();
-
     //initial attack
     if (vardorvis.isPresent() && safeTile != null) {
       if (vardorvis.get().getWorldLocation().getX() == safeTile.getX() + 4
           && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
           && vardorvis.get().getAnimation() == -1
       ) {
+
         if (config.MIN_FOOD() <= Inventory.search().withAction("Eat")
             .result()
             .size() && config.MIN_PRAYER_POTIONS() <= Inventory.search()
