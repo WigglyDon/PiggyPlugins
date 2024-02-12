@@ -13,6 +13,7 @@ import com.example.Packets.WidgetPackets;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisConfig;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
+import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import java.util.List;
 import java.util.Optional;
 import net.runelite.api.Client;
@@ -33,8 +34,11 @@ public class FightingState {
   private boolean drankSuperCombat;
   private static int axeTicks = 0;
 
+  private MainClassContext context;
+
   public void execute(MainClassContext context) {
     client = context.getClient();
+    this.context = context;
     AutoVardorvisConfig config = context.getConfig();
 
     drankSuperCombat = context.isDrankSuperCombat();
@@ -207,6 +211,7 @@ public class FightingState {
     EthanApiPlugin.sendClientMessage("No HP or Prayer. Teleporting away!");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
+    context.setContextBotState(State.GO_TO_BANK);
   }
 
   private boolean needsToDrinkPrayer(int at) {

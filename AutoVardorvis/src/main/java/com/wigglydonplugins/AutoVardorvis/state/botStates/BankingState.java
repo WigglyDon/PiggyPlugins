@@ -3,6 +3,7 @@ package com.wigglydonplugins.AutoVardorvis.state.botStates;
 import com.example.EthanApiPlugin.Collections.Bank;
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
+import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.InteractionApi.BankInteraction;
 import com.example.InteractionApi.InventoryInteraction;
@@ -12,8 +13,11 @@ import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisConfig;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
+import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import java.awt.event.KeyEvent;
+import java.util.Optional;
 import net.runelite.api.Client;
+import net.runelite.api.TileObject;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 
@@ -30,6 +34,13 @@ public class BankingState {
     int tickDelay = context.getContextTickDelay();
     this.config = context.getConfig();
     this.client = context.getClient();
+    Optional<TileObject> strangleWoodPyramid = TileObjects.search().withId(48723).first();
+
+    strangleWoodPyramid.ifPresent((e) -> {
+      System.out.println("changing to GoToVardorvisState");
+      context.setContextBotState(State.GO_TO_VARDORVIS);
+    });
+
     if (preparedForTrip() && !Bank.isOpen() && NPCs.search().nameContains("Jack").nearestToPlayer()
         .isPresent()) {
       Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {

@@ -1,9 +1,11 @@
 package com.wigglydonplugins.AutoVardorvis.state.botStates;
 
+import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.TileObjectInteraction;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
+import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import java.util.Optional;
 import net.runelite.api.Client;
 import net.runelite.api.Skill;
@@ -11,12 +13,17 @@ import net.runelite.api.TileObject;
 
 public class GoToBankState {
 
-  public MainClassContext context;
   public Client client;
 
   public void execute(MainClassContext context) {
-    this.context = context;
     this.client = context.getClient();
+
+    if (NPCs.search().nameContains("Jack").nearestToPlayer().isPresent()) {
+      System.out.println("changing to BankingState");
+      context.setContextBotState(State.BANKING);
+      context.setContextTickDelay(5);
+      return;
+    }
     if (!inHouse()) {
       teleToHouse();
       return;
