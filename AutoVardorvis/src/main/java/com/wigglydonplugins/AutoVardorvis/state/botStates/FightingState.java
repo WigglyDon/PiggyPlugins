@@ -68,6 +68,32 @@ public class FightingState {
       PrayerUtil.togglePrayer(Prayer.PIETY);
     }
 
+    if (safeTile != null && !newAxes.isEmpty()) {
+      newAxes.forEach((axe) -> {
+        if (axe.getWorldLocation().getX() == safeTile.getX() - 1
+            && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
+          handleAxeMove();
+        }
+      });
+    }
+
+    if (safeTile != null && !activeAxes.isEmpty()) {
+      activeAxes.forEach((axe) -> {
+        if (axe.getWorldLocation().getX() == safeTile.getX() + 1
+            && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
+          axeTicks = 1;
+          handleAxeMove();
+        }
+      });
+    }
+    
+    if (safeTile != null) {
+      if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
+        movePlayerToTile(safeTile);
+        return;
+      }
+    }
+
     doBloodCaptcha();
     eat(config.EATAT());
     drinkPrayer(config.DRINKPRAYERAT());
@@ -111,32 +137,7 @@ public class FightingState {
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
-        return;
-      }
-    }
-
-    if (safeTile != null && !newAxes.isEmpty()) {
-      newAxes.forEach((axe) -> {
-        if (axe.getWorldLocation().getX() == safeTile.getX() - 1
-            && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
-          handleAxeMove();
-        }
-      });
-    }
-
-    if (safeTile != null && !activeAxes.isEmpty()) {
-      activeAxes.forEach((axe) -> {
-        if (axe.getWorldLocation().getX() == safeTile.getX() + 1
-            && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
-          axeTicks = 1;
-          handleAxeMove();
-        }
-      });
-    }
-
-    if (safeTile != null) {
-      if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
-        movePlayerToTile(safeTile);
+        eat(config.EATAT());
         return;
       }
     }
