@@ -70,6 +70,8 @@ public class FightingState {
     }
 
     doBloodCaptcha();
+    eat(config.EATAT());
+    drinkPrayer(config.DRINKPRAYERAT());
 
     //initial attack
     if (vardorvis.isPresent() && safeTile != null) {
@@ -100,7 +102,8 @@ public class FightingState {
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
-        context.setContextTickDelay(4);
+        context.setContextTickDelay(3);
+        return;
       }
     }
 
@@ -111,7 +114,6 @@ public class FightingState {
           handleAxeMove();
         }
       });
-      return;
     }
 
     if (!activeAxes.isEmpty()) {
@@ -122,7 +124,13 @@ public class FightingState {
           handleAxeMove();
         }
       });
-      return;
+    }
+
+    if (safeTile != null) {
+      if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
+        movePlayerToTile(safeTile);
+        return;
+      }
     }
 
     if (safeRock.isPresent() && safeTile == null) {
@@ -130,17 +138,7 @@ public class FightingState {
       safeTile = new WorldPoint(safeRockLocation.getX() + 6, safeRockLocation.getY() - 10, 0);
       axeMoveTile = new WorldPoint(safeTile.getX() + 2, safeTile.getY() - 2, 0);
     }
-
-    if (safeTile != null) {
-      if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
-        movePlayerToTile(safeTile);
-        return;
-      } else {
-        eat(config.EATAT());
-        drinkPrayer(config.DRINKPRAYERAT());
-        context.setDrankSuperCombat(drankSuperCombat);
-      }
-    }
+    context.setDrankSuperCombat(drankSuperCombat);
 
     if (!client.getLocalPlayer().isInteracting()) {
       NPCs.search().nameContains(VARDORVIS).first().ifPresent(npc -> {

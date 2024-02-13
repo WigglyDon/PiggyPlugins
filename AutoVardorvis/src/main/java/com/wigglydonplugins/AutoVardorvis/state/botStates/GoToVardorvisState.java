@@ -32,8 +32,8 @@ public class GoToVardorvisState {
 
     tunnel2.ifPresent((t2) -> {
       WorldPoint tunnel2Location = new WorldPoint(
-          tunnel2.get().getWorldLocation().getX() - 25,
-          tunnel2.get().getWorldLocation().getY() + 3,
+          tunnel2.get().getWorldLocation().getX() - 30,
+          tunnel2.get().getWorldLocation().getY() - 5,
           0);
       if (inStrangleWood && !isMoving()
           || playerLocation.getX() == tunnel2Location.getX()
