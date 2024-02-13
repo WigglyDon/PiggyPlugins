@@ -60,6 +60,11 @@ public class FightingState {
       return;
     }
 
+    if (TileObjects.search().nameContains("Portal Nexus").first().isPresent()) {
+      System.out.println("inside house in fighting state");
+      context.setContextBotState(State.GO_TO_BANK);
+    }
+
     if (client.getGameState() != GameState.LOGGED_IN || !isInFight(client)) {
       turnOffPrayers();
       return;
@@ -73,7 +78,10 @@ public class FightingState {
     eat(config.EATAT());
     drinkPrayer(config.DRINKPRAYERAT());
 
-    if (vardorvis.isEmpty() && TileItems.search().empty() && !enoughFood()) {
+    if (NPCs.search().nameContains("Vardorvis").first().isEmpty())
+//        && TileItems.search().first().isEmpty()
+//        && !enoughFood())
+    {
       System.out.println("BING BONG");
       teleToHouse();
       return;
@@ -109,7 +117,7 @@ public class FightingState {
       }
     }
 
-    if (!newAxes.isEmpty()) {
+    if (safeTile != null && !newAxes.isEmpty()) {
       newAxes.forEach((axe) -> {
         if (axe.getWorldLocation().getX() == safeTile.getX() - 1
             && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
@@ -118,7 +126,7 @@ public class FightingState {
       });
     }
 
-    if (!activeAxes.isEmpty()) {
+    if (safeTile != null && !activeAxes.isEmpty()) {
       activeAxes.forEach((axe) -> {
         if (axe.getWorldLocation().getX() == safeTile.getX() + 1
             && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
