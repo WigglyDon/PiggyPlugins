@@ -44,15 +44,13 @@ public class BankingState {
     if (preparedForTrip() && !Bank.isOpen() && NPCs.search().nameContains("Jack").nearestToPlayer()
         .isPresent()) {
       Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
-        System.out.println("closing withdraw x");
         client.runScript(299, 1, 0, 0);
       });
       Widgets.search().withTextContains("Where would you like to teleport to?").first()
           .ifPresentOrElse(((e) -> {
-            System.out.println("picking the ring option to pyramid");
             WidgetPackets.queueResumePause(e.getId(), 5);
+            context.setContextTickDelay(3);
           }), () -> {
-            System.out.println("clicking teleport on ring in invy");
             Inventory.search().nameContains("Ring of shadows").result().stream().findFirst()
                 .ifPresent(ring ->
                     InventoryInteraction.useItem(ring, "Teleport")
@@ -65,22 +63,17 @@ public class BankingState {
         MovementPackets.queueMovement(bankLocation);
       } else {
         NPCs.search().nameContains("Jack").nearestToPlayer().ifPresent((bank) -> {
-          System.out.println("clicking on jack");
           NPCInteraction.interact(bank, "Bank");
+          context.setContextTickDelay(3);
         });
       }
-      context.setContextTickDelay(3);
     } else if (Bank.isOpen() && !preparedForTrip()) {
-      System.out.println("banking");
       bank();
-      System.out.println("set tick delay to 3");
-      context.setContextTickDelay(3);
     }
   }
 
   private void bank() {
     if (Bank.isOpen() && !preparedForTrip() && Inventory.getEmptySlots() != 28) {
-      System.out.println("depositing all");
       Widgets.search()
           .filter(widget -> widget.getParentId() != 786474).withAction("Deposit inventory").first()
           .ifPresent(button -> {
@@ -88,7 +81,6 @@ public class BankingState {
             WidgetPackets.queueWidgetAction(button, "Deposit inventory");
           });
     } else if (!preparedForTrip()) {
-      System.out.println("withdrawing suppliez");
       withdraw("Ring of shadows", 1);
       withdraw("Teleport to house", 50);
       withdraw("Divine super combat", 1);

@@ -2,7 +2,10 @@ package com.wigglydonplugins.AutoVardorvis;
 
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
+import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.InventoryInteraction;
+import com.example.Packets.MousePackets;
+import com.example.Packets.WidgetPackets;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
@@ -125,7 +128,13 @@ public class AutoVardorvisPlugin extends Plugin {
         tickDelay--;
         return;
       }
-      
+
+      //if run is off
+      if (EthanApiPlugin.getClient().getVarpValue(173) == 0) {
+        MousePackets.queueClickPacket();
+        //turn on run
+        WidgetPackets.queueWidgetActionPacket(1, 10485787, -1, -1);
+      }
       handleBotState(botState, tickDelay);
       if (isInFight()) {
         autoPray();

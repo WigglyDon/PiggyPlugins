@@ -49,6 +49,12 @@ public class FightingState {
 
     if (!TileItems.search().empty()) {
       TileItems.search().first().ifPresent((item) -> {
+        if (Inventory.full() && !Inventory.search().withAction("Eat").empty()) {
+          Inventory.search().withAction("Eat").result().stream()
+              .findFirst()
+              .ifPresent(food -> InventoryInteraction.useItem(food, "Eat")
+              );
+        }
         item.interact(false);
       });
       return;
@@ -94,6 +100,7 @@ public class FightingState {
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
+        context.setContextTickDelay(4);
       }
     }
 
@@ -104,6 +111,7 @@ public class FightingState {
           handleAxeMove();
         }
       });
+      return;
     }
 
     if (!activeAxes.isEmpty()) {
@@ -114,6 +122,7 @@ public class FightingState {
           handleAxeMove();
         }
       });
+      return;
     }
 
     if (safeRock.isPresent() && safeTile == null) {
