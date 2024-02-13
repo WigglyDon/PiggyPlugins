@@ -1,10 +1,4 @@
-pluginManagement {
-    plugins {
-        id 'org.jetbrains.kotlin.jvm' version '1.9.21'
-    }
-}
 rootProject.name = 'example'
-include 'PiggyLoader'
 include 'AoeWarn'
 include 'AutoJugHumidifier'
 include 'AutoRifts'
@@ -47,10 +41,8 @@ include 'DialogueContinuer'
 include 'KittenFeeder'
 include 'AutoChompy'
 include 'AutoTrapper'
-include 'AutoWintertodt'
-include 'AutoChop'
-include 'questhelper'
-include 'questWalker'
+include 'AutoRuneDragons'
 include 'AutoVorkath'
-include 'RSNHider'
+include 'AutoTitheFarm'
+include 'AutoVardorvis'
 

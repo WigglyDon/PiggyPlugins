@@ -2,7 +2,10 @@ package com.polyplugins.AutoBoner;
 
 
 import com.example.EthanApiPlugin.Collections.Inventory;
+import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
+import com.example.EthanApiPlugin.Collections.Widgets;
+import com.example.EthanApiPlugin.Collections.query.NPCQuery;
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.TileObjectInteraction;
 import com.example.Packets.*;
@@ -12,6 +15,7 @@ import com.piggyplugins.PiggyUtils.API.InventoryUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.PlayerSpawned;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -21,6 +25,11 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.HotkeyListener;
+import com.example.Packets.WidgetPackets;
+
+import java.io.Console;
+import java.util.Objects;
+import java.util.Optional;
 
 @PluginDescriptor(
         name = "<html><font color=\"#7ecbf2\">[PJ]</font>AutoBoner</html>",
@@ -42,7 +51,7 @@ public class AutoBonerPlugin extends Plugin {
     private OverlayManager overlayManager;
     @Inject
     private ClientThread clientThread;
-    private boolean started = false;
+    private boolean started = true;
     public int timeout = 0;
 
     @Provides
@@ -73,6 +82,7 @@ public class AutoBonerPlugin extends Plugin {
         if (client.getGameState() != GameState.LOGGED_IN || !started) {
             return;
         }
+
         Inventory.search().onlyUnnoted().nameContains(config.boneName()).first().ifPresent(bone -> {
             TileObjects.search().nameContains(config.altarName()).first().ifPresent(altar -> {
                 MousePackets.queueClickPacket();
@@ -80,7 +90,42 @@ public class AutoBonerPlugin extends Plugin {
                 ObjectPackets.queueWidgetOnTileObject(bone, altar);
             });
         });
+
+        if (Inventory.search().onlyUnnoted().nameContains(config.boneName()).empty()) {
+            Inventory.search().onlyNoted().nameContains(config.boneName()).first().ifPresent(note -> {
+                NPCs.search().nameContains("Elder Chaos druid").first().ifPresent(npc -> {
+                    Widgets.search().withTextContains("Exchange All:").first().ifPresent(widget -> {
+                        MousePackets.queueClickPacket();
+                        WidgetPackets.queueResumePause(widget.getId(), 3);
+                        timeout = 1;
+                    });
+                    MousePackets.queueClickPacket();
+                    NPCPackets.queueWidgetOnNPC(npc, note);
+
+
+                });
+            });
+        }
+
+        TileObjects.search().nameContains("Large door").first().ifPresent(door -> {
+            MousePackets.queueClickPacket();
+            TileObjectInteraction.interact(door, "Open");
+        });
     }
+
+
+    // Elder Chaos druid
+    @Subscribe
+    private void onPlayerSpawned(PlayerSpawned playerSpawned) {
+
+        Player p = playerSpawned.getPlayer();
+        if (!p.getName().equals("Beosot")) {
+            System.out.println("player spotted: " + playerSpawned.getPlayer().getName());
+            //logout packet
+            WidgetPackets.queueWidgetActionPacket(1, 11927560, -1, -1);
+        }
+    }
+
 
     private final HotkeyListener toggle = new HotkeyListener(() -> config.toggle()) {
         @Override

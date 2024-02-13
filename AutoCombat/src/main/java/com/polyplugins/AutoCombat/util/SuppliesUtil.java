@@ -24,7 +24,7 @@ public class SuppliesUtil {
     @Getter
     @Setter
     private List<String> foodNames = List.of("Cake", "cake","Herring", "Trout", "Lobster", "Swordfish",
-            "Monkfish", "Shark", "Manta ray", "Dark crab", "Anglerfish", "Tuna potato", "Karambwan");
+            "Monkfish", "Shark", "Manta ray", "Dark crab", "Anglerfish", "Tuna potato", "karambwan");
 
     /**
      * Finds any teleport tab in the inventory
@@ -46,6 +46,16 @@ public class SuppliesUtil {
             return name.contains("rayer potion") || name.contains("uper restore");
 
         }).first();
+        return potion.orElse(null);
+    }
+
+    /**
+     * Finds any unnoted Combat Potion in the inventory
+     *
+     * @return The first potion found, or null if none are found
+     */
+    public Widget findRangingPotion() {
+        Optional<Widget> potion = Inventory.search().onlyUnnoted().withAction("Drink").nameContains("anging potion").first();
         return potion.orElse(null);
     }
 
