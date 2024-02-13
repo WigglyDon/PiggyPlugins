@@ -49,7 +49,7 @@ public class BankingState {
       Widgets.search().withTextContains("Where would you like to teleport to?").first()
           .ifPresentOrElse(((e) -> {
             WidgetPackets.queueResumePause(e.getId(), 5);
-            context.setContextTickDelay(5);
+            context.setContextTickDelay(4);
           }), () -> {
             Inventory.search().nameContains("Ring of shadows").result().stream().findFirst()
                 .ifPresent(ring ->

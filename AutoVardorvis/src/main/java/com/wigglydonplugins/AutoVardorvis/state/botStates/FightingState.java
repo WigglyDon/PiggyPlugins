@@ -73,16 +73,19 @@ public class FightingState {
     eat(config.EATAT());
     drinkPrayer(config.DRINKPRAYERAT());
 
+    if (vardorvis.isEmpty() && TileItems.search().empty() && !enoughFood()) {
+      System.out.println("BING BONG");
+      teleToHouse();
+      return;
+    }
+
     //initial attack
     if (vardorvis.isPresent() && safeTile != null) {
       if (vardorvis.get().getWorldLocation().getX() == safeTile.getX() + 4
           && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
           && vardorvis.get().getAnimation() == -1
       ) {
-        if (config.MIN_FOOD() <= Inventory.search().withAction("Eat")
-            .result()
-            .size() && config.MIN_PRAYER_POTIONS() <= Inventory.search()
-            .nameContains("Prayer potion").result().size()) {
+        if (enoughFood()) {
           vardorvis.ifPresent(npc -> {
             NPCInteraction.interact(npc, "Attack");
             if (!drankSuperCombat) {
@@ -102,7 +105,6 @@ public class FightingState {
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
-        context.setContextTickDelay(3);
         return;
       }
     }
@@ -183,6 +185,13 @@ public class FightingState {
   private boolean isInFight(Client client) {
     return client.isInInstancedRegion() && NPCs.search().nameContains(VARDORVIS).nearestToPlayer()
         .isPresent();
+  }
+
+  private boolean enoughFood() {
+    return context.getConfig().MIN_FOOD() <= Inventory.search().withAction("Eat")
+        .result()
+        .size() && context.getConfig().MIN_PRAYER_POTIONS() <= Inventory.search()
+        .nameContains("Prayer potion").result().size();
   }
 
   private void turnOffPrayers() {
