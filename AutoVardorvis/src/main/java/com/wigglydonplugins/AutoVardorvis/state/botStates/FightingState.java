@@ -18,7 +18,6 @@ import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import java.util.List;
 import java.util.Optional;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.NPC;
 import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
@@ -65,11 +64,6 @@ public class FightingState {
       context.setContextBotState(State.GO_TO_BANK);
     }
 
-    if (client.getGameState() != GameState.LOGGED_IN || !isInFight(client)) {
-      turnOffPrayers();
-      return;
-    }
-
     if (!PrayerUtil.isPrayerActive(Prayer.PIETY)) {
       PrayerUtil.togglePrayer(Prayer.PIETY);
     }
@@ -78,13 +72,17 @@ public class FightingState {
     eat(config.EATAT());
     drinkPrayer(config.DRINKPRAYERAT());
 
-    if (NPCs.search().nameContains("Vardorvis").first().isEmpty())
-//        && TileItems.search().first().isEmpty()
-//        && !enoughFood())
-    {
-      System.out.println("BING BONG");
-      teleToHouse();
-      return;
+    if (!isInFight(client)) {
+      turnOffPrayers();
+      if (TileItems.search().first().isEmpty() && !enoughFood()
+      ) {
+        teleToHouse();
+        return;
+      } else if (safeTile != null) {
+        if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
+          movePlayerToTile(safeTile);
+        }
+      }
     }
 
     //initial attack
@@ -237,7 +235,7 @@ public class FightingState {
 
 
   private void teleToHouse() {
-    EthanApiPlugin.sendClientMessage("cant finish kill :(");
+    EthanApiPlugin.sendClientMessage("teleporting to house");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
     safeTile = null;

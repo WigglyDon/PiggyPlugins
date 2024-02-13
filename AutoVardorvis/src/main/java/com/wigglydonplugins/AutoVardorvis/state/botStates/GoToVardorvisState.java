@@ -41,7 +41,6 @@ public class GoToVardorvisState {
         if (tunnel1.isPresent()) {
           if (tunnel1.get().getWorldLocation().distanceTo(playerLocation) <= 4) {
             tunnel1.ifPresent((t1) -> {
-              System.out.println("click tunnel CUZ STUCK");
               TileObjectInteraction.interact(t1, "Enter");
             });
             return;
@@ -57,7 +56,6 @@ public class GoToVardorvisState {
               TileObjectInteraction.interact(rock, "Climb-over");
             }, () -> {
               tunnel1.ifPresent((t1) -> {
-                System.out.println("click tunnel");
                 TileObjectInteraction.interact(t1, "Enter");
               });
             });
