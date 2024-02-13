@@ -37,7 +37,6 @@ public class BankingState {
     Optional<TileObject> strangleWoodPyramid = TileObjects.search().withId(48723).first();
 
     strangleWoodPyramid.ifPresent((e) -> {
-      System.out.println("changing to GoToVardorvisState");
       context.setContextBotState(State.GO_TO_VARDORVIS);
     });
 

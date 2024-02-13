@@ -229,7 +229,7 @@ public class FightingState {
 
 
   private void teleToHouse() {
-    EthanApiPlugin.sendClientMessage("No HP or Prayer. Teleporting away!");
+    EthanApiPlugin.sendClientMessage("cant finish kill :(");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
     safeTile = null;

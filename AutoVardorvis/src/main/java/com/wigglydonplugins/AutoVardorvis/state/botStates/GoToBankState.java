@@ -27,7 +27,6 @@ public class GoToBankState {
       PrayerUtil.togglePrayer(Prayer.PROTECT_FROM_MELEE);
     }
     if (NPCs.search().nameContains("Jack").nearestToPlayer().isPresent()) {
-      System.out.println("changing to BankingState");
       context.setContextBotState(State.BANKING);
       return;
     }
@@ -42,7 +41,6 @@ public class GoToBankState {
       pool.ifPresent(poolObject -> {
         TileObjectInteraction.interact(poolObject, "Drink");
       });
-      System.out.println("trying to drink pool");
       context.setContextTickDelay(3);
       return;
     }

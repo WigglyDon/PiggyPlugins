@@ -26,7 +26,6 @@ public class GoToVardorvisState {
     WorldPoint playerLocation = context.getClient().getLocalPlayer().getWorldLocation();
 
     if (isInFight(context.getClient())) {
-      System.out.println("changing to FightingState");
       context.setContextBotState(State.FIGHTING);
     }
 
@@ -39,15 +38,22 @@ public class GoToVardorvisState {
           || playerLocation.getX() == tunnel2Location.getX()
           && playerLocation.getY() == tunnel2Location.getY()
       ) {
+        if (tunnel1.isPresent()) {
+          if (tunnel1.get().getWorldLocation().distanceTo(playerLocation) <= 4) {
+            tunnel1.ifPresent((t1) -> {
+              System.out.println("click tunnel CUZ STUCK");
+              TileObjectInteraction.interact(t1, "Enter");
+            });
+          }
+          return;
+        }
         if (tunnel2.get().getWorldLocation()
             .distanceTo(playerLocation) <= 20) {
-          System.out.println("tunnel 2 too close");
           MousePackets.queueClickPacket();
           MovementPackets.queueMovement(tunnel2Location);
         } else {
           if (inStrangleWood && !isMoving()) {
             vardorvisRock.ifPresentOrElse((rock) -> {
-              System.out.println("click climb over");
               TileObjectInteraction.interact(rock, "Climb-over");
             }, () -> {
               tunnel1.ifPresent((t1) -> {
