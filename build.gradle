@@ -87,8 +87,6 @@ dependencies {
     compileOnly project(path: ':AutoVardorvis')
     testImplementation project(path: 'AutoVardorvis')
 
-    compileOnly project(path: ':AutoChop')
-    testImplementation project(path: ':AutoChop')
     compileOnly project(path: ':PathingTesting')
     testImplementation project(path: ':PathingTesting')
     compileOnly project(path: ':AutoVorkath')

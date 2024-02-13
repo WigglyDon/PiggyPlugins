@@ -45,4 +45,5 @@ include 'AutoRuneDragons'
 include 'AutoVorkath'
 include 'AutoTitheFarm'
 include 'AutoVardorvis'
+include ':RSNHider'
 
