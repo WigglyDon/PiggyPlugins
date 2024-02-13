@@ -68,34 +68,29 @@ public class FightingState {
       PrayerUtil.togglePrayer(Prayer.PIETY);
     }
 
-    if (safeTile != null && !newAxes.isEmpty()) {
-      newAxes.forEach((axe) -> {
-        if (axe.getWorldLocation().getX() == safeTile.getX() - 1
-            && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
-          handleAxeMove();
-        }
-      });
-    }
-
-    if (safeTile != null && !activeAxes.isEmpty()) {
-      activeAxes.forEach((axe) -> {
-        if (axe.getWorldLocation().getX() == safeTile.getX() + 1
-            && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
-          axeTicks = 1;
-          handleAxeMove();
-        }
-      });
-    }
-    
+    //axe dodge
     if (safeTile != null) {
-      if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
-        movePlayerToTile(safeTile);
-        return;
+      if (!newAxes.isEmpty()) {
+        newAxes.forEach((axe) -> {
+          if (axe.getWorldLocation().getX() == safeTile.getX() - 1
+              && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
+            handleAxeMove();
+          }
+        });
+      } else if (!activeAxes.isEmpty()) {
+        activeAxes.forEach((axe) -> {
+          if (axe.getWorldLocation().getX() == safeTile.getX() + 1
+              && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
+            axeTicks = 1;
+            handleAxeMove();
+          }
+        });
+      } else {
+        eat(config.EATAT());
       }
     }
 
     doBloodCaptcha();
-    eat(config.EATAT());
     drinkPrayer(config.DRINKPRAYERAT());
 
     if (!isInFight(client)) {
@@ -138,6 +133,13 @@ public class FightingState {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
         eat(config.EATAT());
+        return;
+      }
+    }
+
+    if (safeTile != null) {
+      if (playerTile.getX() != safeTile.getX() || playerTile.getY() != safeTile.getY()) {
+        movePlayerToTile(safeTile);
         return;
       }
     }

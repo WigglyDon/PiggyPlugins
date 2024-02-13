@@ -86,6 +86,8 @@ public class BankingState {
       withdraw("Prayer potion", config.PPOTS_TO_BRING());
       withdraw("Manta ray", 100);
       sendKey(KeyEvent.VK_ESCAPE);
+    } else {
+      sendKey(KeyEvent.VK_ESCAPE);
     }
   }
 
