@@ -78,6 +78,7 @@ public class FightingState {
           }
         });
       } else if (!activeAxes.isEmpty()) {
+        //test
         activeAxes.forEach((axe) -> {
           if (axe.getWorldLocation().getX() == safeTile.getX() + 1
               && axe.getWorldLocation().getY() == safeTile.getY() - 1) {
