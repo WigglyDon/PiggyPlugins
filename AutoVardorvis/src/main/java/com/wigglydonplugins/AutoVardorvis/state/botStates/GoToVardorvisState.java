@@ -44,8 +44,8 @@ public class GoToVardorvisState {
               System.out.println("click tunnel CUZ STUCK");
               TileObjectInteraction.interact(t1, "Enter");
             });
+            return;
           }
-          return;
         }
         if (tunnel2.get().getWorldLocation()
             .distanceTo(playerLocation) <= 20) {
