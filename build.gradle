@@ -80,17 +80,16 @@ dependencies {
 //    testImplementation project(path: ':ItemCombiner')
     compileOnly project(path: ':PowerSkiller')
     testImplementation project(path: ':PowerSkiller')
+
     compileOnly project(path: ':AutoVorkath')
     testImplementation project(path: ':AutoVorkath')
-
-    //AUTO VARDORVIS
     compileOnly project(path: ':AutoVardorvis')
     testImplementation project(path: 'AutoVardorvis')
+    compileOnly project(path: ':AutoCrafting')
+    testImplementation project(path: 'AutoCrafting')
 
     compileOnly project(path: ':PathingTesting')
     testImplementation project(path: ':PathingTesting')
-    compileOnly project(path: ':AutoVorkath')
-    testImplementation project(path: ':AutoVorkath')
     compileOnly project(path: ':RSNHider')
     testImplementation project(path: ':RSNHider')
 
