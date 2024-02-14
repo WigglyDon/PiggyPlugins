@@ -85,13 +85,13 @@ public class FightingState {
             handleAxeMove();
           }
         });
-      } else {
-        eat(config.EATAT());
       }
+
     }
 
     doBloodCaptcha();
     drinkPrayer(config.DRINKPRAYERAT());
+    eat(config.EATAT());
 
     if (!isInFight(client)) {
       turnOffPrayers();
