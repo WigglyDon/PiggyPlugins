@@ -1,4 +1,4 @@
-package java.com.wigglydonplugins.AutoCrafting;
+package com.wigglydonplugins.AutoCrafting;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;

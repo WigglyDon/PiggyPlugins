@@ -1,4 +1,4 @@
-package java.com.wigglydonplugins.AutoCrafting;
+package com.wigglydonplugins.AutoCrafting;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;

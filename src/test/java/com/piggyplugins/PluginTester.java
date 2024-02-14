@@ -20,10 +20,10 @@ import com.polyplugins.Chompy.AutoChompyPlugin;
 import com.polyplugins.Dialogue.DialogueContinuerPlugin;
 import com.polyplugins.KittenFeeder.KittenFeederPlugin;
 import com.polyplugins.Trapper.AutoTrapperPlugin;
-import java.com.wigglydonplugins.AutoCrafting.AutoCraftingPlugin;
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin;
+import com.wigglydonplugins.AutoCrafting.AutoCraftingPlugin;
 
 public class PluginTester {
     public static void main(String[] args) throws Exception {
