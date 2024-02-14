@@ -38,7 +38,7 @@ compileTestKotlin {
 task PiggyJar(type: Jar) {
     manifest {
     }
-    baseName = 'auto-chop'
+    baseName = 'auto-vorkath'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
