@@ -1,5 +1,7 @@
 package com.wigglydonplugins.AutoCrafting;
 
+import com.wigglydonplugins.AutoCrafting.config_types.ARMOR_TYPE;
+import com.wigglydonplugins.AutoCrafting.config_types.LEATHER_TYPE;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -8,54 +10,22 @@ import net.runelite.client.config.ConfigItem;
 public interface AutoCraftingConfig extends Config {
 
   @ConfigItem(
-      keyName = "eatat",
-      name = "Eat at",
-      description = "Eat at what health?",
+      keyName = "Leather type",
+      name = "Leather type",
+      description = "Type of leather?",
       position = 0
   )
-  default int EATAT() {
-    return 75;
+  default LEATHER_TYPE LEATHER_TYPE() {
+    return LEATHER_TYPE.LEATHER;
   }
 
   @ConfigItem(
-      keyName = "drinkprayerat",
-      name = "Drink prayer potion at",
-      description = "Drink prayer potion when?",
+      keyName = "Armor type",
+      name = "Armor type",
+      description = "Type of armor?",
       position = 1
   )
-  default int DRINKPRAYERAT() {
-    return 15;
-  }
-
-  @ConfigItem(
-      keyName = "minFood",
-      name = "minimum food",
-      description = "min food for another kill",
-      position = 2
-  )
-  default int MIN_FOOD() {
-    return 7;
-  }
-
-  @ConfigItem(
-      keyName = "minPrayer",
-      name = "minimum prayer",
-      description = "min ppots for another kill",
-      position = 2
-  )
-  default int MIN_PRAYER_POTIONS() {
-    return 1;
-  }
-
-  @ConfigItem(
-      keyName = "ppotsToBring",
-      name = "ppots to bring",
-      description = "how many ppots to bring?",
-      position = 3
-  )
-  default int PPOTS_TO_BRING() {
-    return 3;
-  }
+  default ARMOR_TYPE ARMOR_TYPE() { return ARMOR_TYPE.VAMBRACES; }
 
 
 }

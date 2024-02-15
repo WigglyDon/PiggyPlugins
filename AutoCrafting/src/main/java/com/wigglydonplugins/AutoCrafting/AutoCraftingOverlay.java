@@ -16,10 +16,8 @@ import net.runelite.client.ui.overlay.components.LineComponent;
 public class AutoCraftingOverlay extends OverlayPanel {
 
     private final Client client;
-    private final SpriteManager spriteManager;
     private final AutoCraftingPlugin plugin;
 
-    private double killsPerHour = 0.0;
 
 
 
@@ -28,22 +26,21 @@ public class AutoCraftingOverlay extends OverlayPanel {
     private AutoCraftingOverlay(Client client, SpriteManager spriteManager, AutoCraftingPlugin plugin) {
         super(plugin);
         this.client = client;
-        this.spriteManager = spriteManager;
         this.plugin = plugin;
         setPosition(OverlayPosition.BOTTOM_RIGHT);
         setLayer(OverlayLayer.ABOVE_WIDGETS);
-        setPriority(OverlayPriority.HIGH);
     }
 
     @Override
     public Dimension render(Graphics2D graphics2D) {
-        String killsText;
-        if (killsPerHour != 0.0) {
-            killsText = String.format("%.1f", killsPerHour);
-        } else {
-            killsText = "0.0";
-        }
         panelComponent.getChildren().clear();
+
+      LineComponent tickDelay = buildLine("Tick Delay: ", Integer.toString(plugin.tickDelay));
+      panelComponent.getChildren().add(tickDelay);
+
+      LineComponent playerIdleCounter = buildLine("playerIdleCounter: ", Integer.toString(
+          plugin.playerIdleCounter));
+      panelComponent.getChildren().add(playerIdleCounter);
 
         return super.render(graphics2D);
     }

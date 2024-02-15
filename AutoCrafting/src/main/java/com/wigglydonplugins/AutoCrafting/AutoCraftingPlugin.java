@@ -1,11 +1,19 @@
 package com.wigglydonplugins.AutoCrafting;
 
+import com.example.EthanApiPlugin.Collections.Inventory;
+import com.example.EthanApiPlugin.Collections.Widgets;
+import com.example.EthanApiPlugin.EthanApiPlugin;
+import com.example.InteractionApi.InventoryInteraction;
+import com.example.Packets.MousePackets;
+import com.example.Packets.WidgetPackets;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.Player;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -28,7 +36,8 @@ public class AutoCraftingPlugin extends Plugin {
   @Inject
   private AutoCraftingConfig config;
   boolean running = false;
-  private int tickDelay = 0;
+  int tickDelay = 0;
+  private Widget leatherItem = null;
   @Provides
   private AutoCraftingConfig getConfig(ConfigManager configManager) {
     return configManager.getConfig(AutoCraftingConfig.class);
@@ -44,7 +53,7 @@ public class AutoCraftingPlugin extends Plugin {
     overlayManager.remove(overlay);
     running = false;
   }
-
+  int playerIdleCounter = 0;
 
   @Subscribe
   private void onGameTick(GameTick event) {
@@ -53,6 +62,40 @@ public class AutoCraftingPlugin extends Plugin {
         tickDelay--;
         return;
       }
+
+      Inventory.search().withId(config.LEATHER_TYPE().getLeatherType()).first().ifPresent((leather) -> {
+        leatherItem = leather;
+      });
+
+      if (config.ARMOR_TYPE().getLeatherNeeded() <= Inventory.getItemAmount(config.LEATHER_TYPE().getLeatherType())) {
+
+        // if idle
+        if (playerIdleCounter == 0) {
+          //if on craft menu
+          if (Widgets.search().withTextContains("How many do you wish to make?").first().isPresent()) {
+//            System.out.println("craft x screen");
+            //else craft
+          } else {
+          InventoryInteraction.useItem("Needle", "Use");
+          Inventory.search().nameContains("Needle").first().ifPresent(needle -> {
+            MousePackets.queueClickPacket();
+            MousePackets.queueClickPacket();
+            WidgetPackets.queueWidgetOnWidget(needle, leatherItem);
+            System.out.println("click needle on leather");
+          });
+          }
+
+          // not idle
+        } else if (client.getLocalPlayer().getAnimation() == -1) {
+          //wait for idle
+            playerIdleCounter --;
+        } else playerIdleCounter = 5;
+      } else {
+        //bank here
+        System.out.println("not enough materials left");
+//        bank();
+      }
+
     }
   }
 
