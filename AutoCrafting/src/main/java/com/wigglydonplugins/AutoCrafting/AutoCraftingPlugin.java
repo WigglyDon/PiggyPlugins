@@ -4,31 +4,21 @@ import com.example.EthanApiPlugin.Collections.Bank;
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.Widgets;
-import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.BankInteraction;
 import com.example.InteractionApi.BankInventoryInteraction;
-import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.WidgetPackets;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.event.KeyEvent;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.MenuAction;
-import net.runelite.api.MenuEntry;
-import net.runelite.api.Player;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -133,8 +123,9 @@ public class AutoCraftingPlugin extends Plugin {
       String armorName = Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType()).first()
           .get().getName();
       BankInventoryInteraction.useItem(armorName, "Deposit-All");
-    } else {
+    } else if (Bank.isOpen()) {
       withdraw(config.LEATHER_TYPE().getLeatherType(), 100);
+      lastCrafted = 0;
     }
   }
 
