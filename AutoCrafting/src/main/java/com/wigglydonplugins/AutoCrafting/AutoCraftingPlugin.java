@@ -1,13 +1,19 @@
 package com.wigglydonplugins.AutoCrafting;
 
+import com.example.EthanApiPlugin.Collections.Bank;
 import com.example.EthanApiPlugin.Collections.Inventory;
+import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.EthanApiPlugin.EthanApiPlugin;
+import com.example.InteractionApi.BankInteraction;
+import com.example.InteractionApi.BankInventoryInteraction;
 import com.example.InteractionApi.InventoryInteraction;
+import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.WidgetPackets;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Locale;
@@ -67,7 +73,6 @@ public class AutoCraftingPlugin extends Plugin {
   @Subscribe
   private void onGameTick(GameTick event) {
     if (!running || tickDelay > 0) {
-      // Plugin not running or there's a tick delay
       tickDelay--;
       return;
     }
@@ -77,7 +82,7 @@ public class AutoCraftingPlugin extends Plugin {
 
     //leather crafting animation
     if (client.getLocalPlayer().getAnimation() == 1249) {
-      lastCrafted = 7;
+      lastCrafted = 3;
     }
 
     Inventory.search().withId(config.LEATHER_TYPE().getLeatherType()).first()
@@ -96,12 +101,12 @@ public class AutoCraftingPlugin extends Plugin {
           Widgets.search().withAction("Make").nameContains(config.ARMOR_TYPE().getArmorType())
               .first()
               .ifPresentOrElse((w) -> {
-                System.out.println("try to click: ");
-                System.out.println(w.getName());
 
-                //CHILD ID IS WHERE QUANTITY HAPPENS?
-                WidgetPackets.queueResumePause(w.getId(), 28);
-                lastCrafted = 7;
+                int remainingLeather = Inventory.getItemAmount(
+                    config.LEATHER_TYPE().getLeatherType());
+                WidgetPackets.queueResumePause(w.getId(), remainingLeather);
+                lastCrafted = 3;
+
               }, () -> {
                 Inventory.search().nameContains("Needle").first().ifPresent(needle -> {
                   MousePackets.queueClickPacket();
@@ -109,17 +114,52 @@ public class AutoCraftingPlugin extends Plugin {
                   WidgetPackets.queueWidgetOnWidget(needle, leatherItem);
                 });
               });
-
         }
-        // else make
-
       }
 
 
+    } else if (!Bank.isOpen() && Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType())
+        .first().isPresent()) {
+      NPCs.search().nameContains("Banker").nearestToPlayer().ifPresent((banker) -> {
+        NPCInteraction.interact(banker, "Bank");
+      });
+    }
+    bank();
+  }
+
+  private void bank() {
+    if (Bank.isOpen() && Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType()).first()
+        .isPresent()) {
+      String armorName = Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType()).first()
+          .get().getName();
+      BankInventoryInteraction.useItem(armorName, "Deposit-All");
     } else {
-      //bank here
-      System.out.println("not enough materials left");
-//        bank();
+      withdraw(config.LEATHER_TYPE().getLeatherType(), 100);
     }
   }
+
+  private void withdraw(int id, int amount) {
+    Bank.search().withId(id).first().ifPresent(item ->
+        BankInteraction.withdrawX(item, amount)
+    );
+  }
+
+  private void sendKey(int key) {
+    keyEvent(KeyEvent.KEY_PRESSED, key);
+    keyEvent(KeyEvent.KEY_RELEASED, key);
+  }
+
+  private void keyEvent(int id, int key) {
+    KeyEvent e = new KeyEvent(
+        client.getCanvas(),
+        id,
+        System.currentTimeMillis(),
+        0,
+        key,
+        KeyEvent.CHAR_UNDEFINED
+    );
+    client.getCanvas().dispatchEvent(e);
+  }
+
+
 }
