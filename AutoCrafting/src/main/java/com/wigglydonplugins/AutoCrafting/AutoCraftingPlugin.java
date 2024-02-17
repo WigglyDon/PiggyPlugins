@@ -71,7 +71,7 @@ public class AutoCraftingPlugin extends Plugin {
     }
 
     //leather crafting animation
-    if (client.getLocalPlayer().getAnimation() == 1249) {
+    if (client.getLocalPlayer().getAnimation() == 1249 && !Inventory.full()) {
       lastCrafted = 3;
     }
 
@@ -123,9 +123,10 @@ public class AutoCraftingPlugin extends Plugin {
       String armorName = Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType()).first()
           .get().getName();
       BankInventoryInteraction.useItem(armorName, "Deposit-All");
-    } else if (Bank.isOpen()) {
       withdraw(config.LEATHER_TYPE().getLeatherType(), 100);
+      sendKey(KeyEvent.VK_ESCAPE);
       lastCrafted = 0;
+
     }
   }
 
