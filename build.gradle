@@ -87,6 +87,8 @@ dependencies {
     testImplementation project(path: 'AutoVardorvis')
     compileOnly project(path: ':AutoCrafting')
     testImplementation project(path: 'AutoCrafting')
+    compileOnly project(path: 'AutoHerblore')
+    testImplementation project(path: 'AutoHerblore')
 
     compileOnly project(path: ':PathingTesting')
     testImplementation project(path: ':PathingTesting')

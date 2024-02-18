@@ -47,4 +47,5 @@ include ':RSNHider'
 include 'AutoVorkath'
 include 'AutoVardorvis'
 include 'AutoCrafting'
+include 'AutoHerblore'
 
