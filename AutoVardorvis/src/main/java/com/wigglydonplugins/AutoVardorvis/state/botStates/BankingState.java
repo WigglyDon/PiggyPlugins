@@ -68,6 +68,10 @@ public class BankingState {
       }
     } else if (Bank.isOpen() && !preparedForTrip()) {
       bank();
+    } else if (Bank.isOpen() && preparedForTrip()) {
+      Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
+        client.runScript(299, 1, 0, 0);
+      });
     }
   }
 

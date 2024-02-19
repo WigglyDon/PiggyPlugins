@@ -28,6 +28,15 @@ public class GoToVardorvisState {
     if (isInFight(context.getClient())) {
       context.setContextBotState(State.FIGHTING);
     }
+    if (tunnel1.isPresent()) {
+      if (tunnel1.get().getWorldLocation().distanceTo(playerLocation) <= 5) {
+        System.out.println("slammy");
+        tunnel1.ifPresent((t1) -> {
+          TileObjectInteraction.interact(t1, "Enter");
+        });
+        return;
+      }
+    }
 
     tunnel2.ifPresent((t2) -> {
       WorldPoint tunnel2Location = new WorldPoint(
