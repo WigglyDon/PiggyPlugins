@@ -114,6 +114,9 @@ public class FightingState {
       ) {
         if (enoughFood()) {
           vardorvis.ifPresent(npc -> {
+            //check if main attack
+            // add special attack logic
+            // need to track current hp of boss
             NPCInteraction.interact(npc, "Attack");
             if (!drankSuperCombat) {
               Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
@@ -153,6 +156,9 @@ public class FightingState {
 
     if (!client.getLocalPlayer().isInteracting()) {
       NPCs.search().nameContains(VARDORVIS).first().ifPresent(npc -> {
+        //check if main attack
+        // add special attack logic
+        // need to track current hp of boss
         NPCInteraction.interact(npc, "Attack");
       });
     }
