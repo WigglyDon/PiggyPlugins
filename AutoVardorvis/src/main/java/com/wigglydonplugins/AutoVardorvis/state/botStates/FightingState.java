@@ -112,7 +112,6 @@ public class FightingState {
           && vardorvis.get().getWorldLocation().getY() == safeTile.getY() - 1
           && vardorvis.get().getAnimation() == -1
       ) {
-        
         if (enoughFood()) {
           vardorvis.ifPresent(npc -> {
             NPCInteraction.interact(npc, "Attack");
