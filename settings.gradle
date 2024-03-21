@@ -48,4 +48,7 @@ include 'AutoVorkath'
 include 'AutoVardorvis'
 include 'AutoCrafting'
 include 'AutoHerblore'
+include 'StrategyExample'
+include 'BetterProfiles'
+
 

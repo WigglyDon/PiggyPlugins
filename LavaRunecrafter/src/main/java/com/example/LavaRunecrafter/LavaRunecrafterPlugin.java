@@ -144,11 +144,49 @@ public class LavaRunecrafterPlugin extends Plugin {
             WidgetPackets.queueWidgetActionPacket(2, 25362449, -1, -1);
             return;
           }
+          int space = EthanApiPlugin.getFirstFreeSlot(WidgetInfo.INVENTORY);
           if (bindingCharges == 1) {
             //System.out.println("breaking binding");
             MousePackets.queueClickPacket();
+
             WidgetPackets.queueWidgetActionPacket(1, 25362449, -1, -1);
-            int space = EthanApiPlugin.getFirstFreeSlot(WidgetInfo.INVENTORY);
+
+            ObjectPackets.queueObjectAction(1, 34817, 3312, 3254, false);
+            return;
+          }
+          TileObject altar = EthanApiPlugin.findObject("Altar");
+          Widget earthRunes = EthanApiPlugin.getItem(ItemID.EARTH_RUNE, WidgetInfo.INVENTORY);
+          if (altar != null && earthRunes != null) {
+            if (EthanApiPlugin.isMoving() && client.getLocalPlayer().getAnimation() != 791) {
+              return;
+            }
+            //System.out.println(client.getVarbitValue(Varbits.MAGIC_IMBUE));
+            if (getEssenceSlots(WidgetInfo.INVENTORY) > 0
+                && client.getVarbitValue(Varbits.MAGIC_IMBUE) == 0) {
+              //System.out.println("using spell");
+              MousePackets.queueClickPacket();
+              WidgetPackets.queueWidgetActionPacket(1,
+                  WidgetInfoExtended.SPELL_MAGIC_IMBUE.getPackedId(), -1, -1);
+              //System.out.println("initial craft");
+              MousePackets.queueClickPacket();
+              ObjectPackets.queueWidgetOnTileObject(earthRunes, altar);
+              //objectPackets.queueObjectAction(altar, false, "Craft-rune");
+              return;
+            }
+            int essenceInPouches = essenceInPouches();
+            if (essenceInPouches > 0) {
+              if (EthanApiPlugin.getFirstFreeSlot(WidgetInfo.INVENTORY) != -1) {
+                //System.out.println(client.getTickCount() + ": withdrawing essence");
+                handleWithdraw();
+                MousePackets.queueClickPacket();
+                ObjectPackets.queueWidgetOnTileObject(earthRunes, altar);
+                //objectPackets.queueObjectAction(altar, false, "Craft-rune");
+                return;
+              } else {
+                //System.out.println("weird shit");
+              }
+            }
+
             MousePackets.queueClickPacket();
             WidgetPackets.queueWidgetActionPacket(7, 9764864, ItemID.BINDING_NECKLACE, space);
             MousePackets.queueClickPacket();

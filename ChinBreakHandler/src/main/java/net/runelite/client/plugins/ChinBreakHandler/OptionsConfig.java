@@ -5,7 +5,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
-@ConfigGroup("chinBreakHandler")
+@ConfigGroup("piggyBreakHandler")
 public interface OptionsConfig extends Config {
     @ConfigSection(
             name = "Misc",
@@ -27,14 +27,36 @@ public interface OptionsConfig extends Config {
     }
 
     @ConfigItem(
-            keyName = "autoLoginOnDisconnect",
-            name = "Auto Login",
-            description = "Will automatically log you in if you disconnect while a break is planned",
+            keyName = "autoBankPin",
+            name = "Auto Bank Pin",
+            description = "Will automatically enter your bank pin",
             position = 2,
             section = misc
     )
-    default boolean autoLoginOnDisconnect() {
-        return true;
+    default boolean autoBankPin() {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "avoidWorldsPlayerCount",
+            name = "Max Players",
+            description = "Maximum amount of players a world should have when hopping",
+            position = 3,
+            section = misc
+    )
+    default int avoidWorldsPlayerCount() {
+        return 1500;
+    }
+
+    @ConfigItem(
+            keyName = "avoidWorldsNumbers",
+            name = "Avoid Worlds",
+            description = "World numbers you want to avoid hopping to separated by commas.",
+            position = 4,
+            section = misc
+    )
+    default String avoidWorldsNumbers() {
+        return "302,330";
     }
 
     @ConfigSection(

@@ -3,7 +3,6 @@ package com.piggyplugins;
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.PacketUtils.PacketUtilsPlugin;
 import com.example.UpkeepPlugin.UpkeepPlugin;
-import com.wigglydonplugins.autoVorkath.AutoVorkathPlugin;
 import com.piggyplugins.AutoAerial.AutoAerialPlugin;
 import com.piggyplugins.CannonReloader.CannonReloaderPlugin;
 import com.piggyplugins.Firemaking.FiremakingPlugin;
@@ -13,6 +12,7 @@ import com.piggyplugins.PowerSkiller.PowerSkillerPlugin;
 import com.piggyplugins.RooftopAgility.RooftopAgilityPlugin;
 import com.piggyplugins.SpeedDartMaker.SpeedDartMakerPlugin;
 import com.piggyplugins.VardorvisHelper.VardorvisHelperPlugin;
+import com.piggyplugins.strategyexample.StrategySmithPlugin;
 import com.polyplugins.AutoBoner.AutoBonerPlugin;
 import com.polyplugins.AutoCombat.AutoCombatPlugin;
 import com.polyplugins.Butterfly.ButterflyPlugin;
@@ -20,24 +20,30 @@ import com.polyplugins.Chompy.AutoChompyPlugin;
 import com.polyplugins.Dialogue.DialogueContinuerPlugin;
 import com.polyplugins.KittenFeeder.KittenFeederPlugin;
 import com.polyplugins.Trapper.AutoTrapperPlugin;
+import com.wigglydonplugins.AutoCrafting.AutoCraftingPlugin;
+import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin;
+import com.wigglydonplugins.autoVorkath.AutoVorkathPlugin;
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
-import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin;
-import com.wigglydonplugins.AutoCrafting.AutoCraftingPlugin;
 
 public class PluginTester {
-    public static void main(String[] args) throws Exception {
-        ExternalPluginManager.loadBuiltin(EthanApiPlugin.class, PacketUtilsPlugin.class,
 
-                AutoCombatPlugin.class, AutoAerialPlugin.class, AutoBonerPlugin.class,
-                ButterflyPlugin.class, FiremakingPlugin.class, DialogueContinuerPlugin.class,
-                KittenFeederPlugin.class, AutoChompyPlugin.class, PowerSkillerPlugin.class, AutoTrapperPlugin.class,
-                SpeedDartMakerPlugin.class, RooftopAgilityPlugin.class, UpkeepPlugin.class, PvpHelperPlugin.class, CannonReloaderPlugin.class,
-                AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class,
-                AutoVardorvisPlugin.class, AutoCraftingPlugin.class);
+  public static void main(String[] args) throws Exception {
+    ExternalPluginManager.loadBuiltin(EthanApiPlugin.class, PacketUtilsPlugin.class,
+
+        AutoCombatPlugin.class, AutoAerialPlugin.class, AutoBonerPlugin.class,
+        ButterflyPlugin.class, FiremakingPlugin.class, DialogueContinuerPlugin.class,
+        KittenFeederPlugin.class, AutoChompyPlugin.class, PowerSkillerPlugin.class,
+        AutoTrapperPlugin.class,
+        SpeedDartMakerPlugin.class, RooftopAgilityPlugin.class, UpkeepPlugin.class,
+        PvpHelperPlugin.class, CannonReloaderPlugin.class,
+        AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class,
+        AutoVardorvisPlugin.class, AutoCraftingPlugin.class, StrategySmithPlugin.class,
+        AutoBonerPlugin.class);
 //         Don't remove these
         /* Add your plugins in this method when running from the IDE.
            Make sure to include them as a dependency in the build.gradle via `testImplementation` */
-        RuneLite.main(args);
-    }
+
+    RuneLite.main(args);
+  }
 }
