@@ -35,8 +35,8 @@ public class AutoHerbloreOverlay extends OverlayPanel {
     LineComponent tickDelay = buildLine("Tick Delay: ", Integer.toString(plugin.tickDelay));
     panelComponent.getChildren().add(tickDelay);
 
-    LineComponent lastCrafted = buildLine("Last Crafted: ", Integer.toString(plugin.lastCrafted));
-    panelComponent.getChildren().add(lastCrafted);
+    LineComponent lastCreated = buildLine("Last Created: ", Integer.toString(plugin.lastCreated));
+    panelComponent.getChildren().add(lastCreated);
 
     return super.render(graphics2D);
   }

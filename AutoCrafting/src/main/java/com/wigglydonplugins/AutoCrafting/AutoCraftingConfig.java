@@ -6,7 +6,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("AutoVardorvis")
+@ConfigGroup("AutoCrafting")
 public interface AutoCraftingConfig extends Config {
 
   @ConfigItem(
@@ -25,7 +25,9 @@ public interface AutoCraftingConfig extends Config {
       description = "Type of armor?",
       position = 1
   )
-  default ARMOR_TYPE ARMOR_TYPE() { return ARMOR_TYPE.VAMBRACES; }
+  default ARMOR_TYPE ARMOR_TYPE() {
+    return ARMOR_TYPE.VAMBRACES;
+  }
 
 
 }

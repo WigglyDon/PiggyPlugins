@@ -1,32 +1,30 @@
 package com.wigglydonplugins.AutoHerblore;
 
-import com.wigglydonplugins.AutoHerblore.config_types.ARMOR_TYPE;
-import com.wigglydonplugins.AutoHerblore.config_types.LEATHER_TYPE;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("AutoVardorvis")
+@ConfigGroup("AutoHerblore")
 public interface AutoHerbloreConfig extends Config {
 
   @ConfigItem(
-      keyName = "Leather type",
-      name = "Leather type",
-      description = "Type of leather?",
+      keyName = "base potion",
+      name = "base potion",
+      description = "base potion?",
       position = 0
   )
-  default LEATHER_TYPE LEATHER_TYPE() {
-    return LEATHER_TYPE.LEATHER;
+  default String BASE_POTION() {
+    return "Snapdragon potion (unf)";
   }
 
   @ConfigItem(
-      keyName = "Armor type",
-      name = "Armor type",
-      description = "Type of armor?",
+      keyName = "secondary",
+      name = "secondary",
+      description = "secondary?",
       position = 1
   )
-  default ARMOR_TYPE ARMOR_TYPE() {
-    return ARMOR_TYPE.VAMBRACES;
+  default String SECONDARY() {
+    return "Red spiders' eggs";
   }
 
 
