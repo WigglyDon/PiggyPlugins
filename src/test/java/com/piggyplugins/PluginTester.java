@@ -20,7 +20,7 @@ import com.polyplugins.Chompy.AutoChompyPlugin;
 import com.polyplugins.Dialogue.DialogueContinuerPlugin;
 import com.polyplugins.KittenFeeder.KittenFeederPlugin;
 import com.polyplugins.Trapper.AutoTrapperPlugin;
-import com.wigglydonplugins.AutoCrafting.AutoCraftingPlugin;
+import com.wigglydonplugins.AutoHerblore.AutoHerblorePlugin;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin;
 import com.wigglydonplugins.autoVorkath.AutoVorkathPlugin;
 import net.runelite.client.RuneLite;
@@ -38,7 +38,7 @@ public class PluginTester {
         SpeedDartMakerPlugin.class, RooftopAgilityPlugin.class, UpkeepPlugin.class,
         PvpHelperPlugin.class, CannonReloaderPlugin.class,
         AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class,
-        AutoVardorvisPlugin.class, AutoCraftingPlugin.class, StrategySmithPlugin.class,
+        AutoVardorvisPlugin.class, AutoHerblorePlugin.class, StrategySmithPlugin.class,
         AutoBonerPlugin.class);
 //         Don't remove these
         /* Add your plugins in this method when running from the IDE.

@@ -6,7 +6,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("AutoHerblore")
+@ConfigGroup("AutoVardorvis")
 public interface AutoHerbloreConfig extends Config {
 
   @ConfigItem(

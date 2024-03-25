@@ -25,8 +25,8 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
-    name = "<html><font color=\"#FF0000\">[WD]</font>Auto Herblore</html>",
-    description = "Automated herblore plugin"
+    name = "<html><font color=\"#FF0000\">[WD]</font>Auto Crafting</html>",
+    description = "Automated crafting plugin"
 )
 public class AutoHerblorePlugin extends Plugin {
 
