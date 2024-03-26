@@ -87,7 +87,8 @@ public class AutoHerblorePlugin extends Plugin {
             .first()
             .ifPresentOrElse((w) -> {
 
-              WidgetPackets.queueResumePause(w.getId(), 1);
+              int remainingUnfPots = Inventory.getItemAmount(config.BASE_POTION());
+              WidgetPackets.queueResumePause(w.getId(), remainingUnfPots);
               lastCreated = 3;
 
             }, () -> {
