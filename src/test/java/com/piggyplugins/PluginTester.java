@@ -2,6 +2,7 @@ package com.piggyplugins;
 
 import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.PacketUtils.PacketUtilsPlugin;
+import com.example.PrayerFlicker.EthanPrayerFlickerPlugin;
 import com.example.UpkeepPlugin.UpkeepPlugin;
 import com.piggyplugins.AutoAerial.AutoAerialPlugin;
 import com.piggyplugins.CannonReloader.CannonReloaderPlugin;
@@ -40,7 +41,7 @@ public class PluginTester {
         PvpHelperPlugin.class, CannonReloaderPlugin.class,
         AutoVorkathPlugin.class, VardorvisHelperPlugin.class, PiggyUtilsPlugin.class,
         AutoVardorvisPlugin.class, AutoHerblorePlugin.class, AutoCraftingPlugin.class,
-        StrategySmithPlugin.class,
+        StrategySmithPlugin.class, EthanPrayerFlickerPlugin.class,
         AutoBonerPlugin.class);
 //         Don't remove these
         /* Add your plugins in this method when running from the IDE.
