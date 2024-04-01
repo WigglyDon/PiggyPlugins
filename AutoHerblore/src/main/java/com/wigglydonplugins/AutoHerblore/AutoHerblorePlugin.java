@@ -80,9 +80,7 @@ public class AutoHerblorePlugin extends Plugin {
         });
 
     if (!Inventory.search().nameContains(config.BASE_POTION()).empty()) {
-
       if (lastCreated == 0) {
-
         Widgets.search().withAction("Make")
             .first()
             .ifPresentOrElse((w) -> {

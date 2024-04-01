@@ -85,10 +85,8 @@ public class AutoCraftingPlugin extends Plugin {
 
       if (Inventory.search().withId(config.LEATHER_TYPE().getLeatherType()).result().size()
           >= config.ARMOR_TYPE().getLeatherNeeded()) {
-
         if (lastCrafted == 0) {
-
-          Widgets.search().withAction("Make").nameContains(config.ARMOR_TYPE().getArmorType())
+          Widgets.search().withAction("Make")
               .first()
               .ifPresentOrElse((w) -> {
 
@@ -108,8 +106,7 @@ public class AutoCraftingPlugin extends Plugin {
       }
 
 
-    } else if (!Bank.isOpen() && Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType())
-        .first().isPresent()) {
+    } else if (!Bank.isOpen()) {
       NPCs.search().nameContains("Banker").nearestToPlayer().ifPresent((banker) -> {
         NPCInteraction.interact(banker, "Bank");
       });
