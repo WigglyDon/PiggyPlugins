@@ -5,7 +5,6 @@ import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.Widgets;
 import com.example.InteractionApi.BankInteraction;
-import com.example.InteractionApi.BankInventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.WidgetPackets;
@@ -86,7 +85,10 @@ public class AutoCraftingPlugin extends Plugin {
       if (Inventory.search().withId(config.LEATHER_TYPE().getLeatherType()).result().size()
           >= config.ARMOR_TYPE().getLeatherNeeded()) {
         if (lastCrafted == 0) {
-          Widgets.search().withAction("Make")
+          Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
+            client.runScript(299, 1, 0, 0);
+          });
+          Widgets.search().withAction("Make").nameContains(config.ARMOR_TYPE().getArmorType())
               .first()
               .ifPresentOrElse((w) -> {
 
@@ -115,20 +117,31 @@ public class AutoCraftingPlugin extends Plugin {
   }
 
   private void bank() {
-    if (Bank.isOpen() && Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType()).first()
-        .isPresent()) {
-      String armorName = Inventory.search().nameContains(config.ARMOR_TYPE().getArmorType()).first()
-          .get().getName();
-      BankInventoryInteraction.useItem(armorName, "Deposit-All");
-      withdraw(config.LEATHER_TYPE().getLeatherType(), 100);
+    if (Bank.isOpen()) {
+      Widgets.search()
+          .filter(widget -> widget.getParentId() != 786474).withAction("Deposit inventory").first()
+          .ifPresent(button -> {
+            MousePackets.queueClickPacket();
+            WidgetPackets.queueWidgetAction(button, "Deposit inventory");
+          });
+      ;
+      withdrawString("Needle", 1);
+      withdrawString("Thread", 10);
+      withdrawId(config.LEATHER_TYPE().getLeatherType(), 26);
       sendKey(KeyEvent.VK_ESCAPE);
       lastCrafted = 0;
 
     }
   }
 
-  private void withdraw(int id, int amount) {
+  private void withdrawId(int id, int amount) {
     Bank.search().withId(id).first().ifPresent(item ->
+        BankInteraction.withdrawX(item, amount)
+    );
+  }
+
+  private void withdrawString(String name, int amount) {
+    Bank.search().withName(name).first().ifPresent(item ->
         BankInteraction.withdrawX(item, amount)
     );
   }
