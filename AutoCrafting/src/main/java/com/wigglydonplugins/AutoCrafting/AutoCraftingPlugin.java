@@ -109,7 +109,7 @@ public class AutoCraftingPlugin extends Plugin {
 
 
     } else if (!Bank.isOpen()) {
-      NPCs.search().nameContains("Banker").nearestToPlayer().ifPresent((banker) -> {
+      NPCs.search().withAction("Bank").nearestToPlayer().ifPresent((banker) -> {
         NPCInteraction.interact(banker, "Bank");
       });
     }

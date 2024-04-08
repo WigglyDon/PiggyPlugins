@@ -42,6 +42,7 @@ public class BankingState {
 
     if (preparedForTrip() && !Bank.isOpen() && NPCs.search().nameContains("Jack").nearestToPlayer()
         .isPresent()) {
+      
       Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
         client.runScript(299, 1, 0, 0);
       });
