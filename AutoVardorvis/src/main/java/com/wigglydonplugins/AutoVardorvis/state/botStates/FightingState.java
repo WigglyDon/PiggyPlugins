@@ -1,6 +1,5 @@
 package com.wigglydonplugins.AutoVardorvis.state.botStates;
 
-import com.example.EthanApiPlugin.Collections.EquipmentItemWidget;
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileItems;
@@ -12,8 +11,6 @@ import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
-import com.piggyplugins.PiggyUtils.API.EquipmentUtil;
-import com.piggyplugins.PiggyUtils.API.EquipmentUtil.EquipmentSlot;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import com.piggyplugins.PiggyUtils.API.SpellUtil;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisConfig;
@@ -132,6 +129,7 @@ public class FightingState {
             if (!summonedThrall) {
               summonThrall();
               summonedThrall = true;
+              context.setSummonedThrall(true);
             }
 
           });
@@ -164,25 +162,47 @@ public class FightingState {
 
     if (!client.getLocalPlayer().isInteracting()) {
       NPCs.search().nameContains(VARDORVIS).first().ifPresent(npc -> {
-        useSpecialAttack();
+//        useSpecialAttack();
+        specialTest();
         NPCInteraction.interact(npc, "Attack");
       });
     }
   }
 
   private void useSpecialAttack() {
-    Optional<EquipmentItemWidget> mainHandWeapon = EquipmentUtil.getItemInSlot(
-        EquipmentSlot.MAIN_HAND);
     if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
-      if (mainHandWeapon.isPresent()) {
-        if (mainHandWeapon.get().getName()
-            .equals("Dragon claws")) {
-          EthanApiPlugin.sendClientMessage(
-              "tryin to special attack with claws... percent: " + client.getVarpValue(
-                  VarPlayer.SPECIAL_ATTACK_PERCENT));
-          MousePackets.queueClickPacket();
-          WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
-        }
+      if (Inventory.search().nameContains("Dragon claws").first().isEmpty()) {
+        EthanApiPlugin.sendClientMessage(
+            "tryin to special attack with claws... percent: " + client.getVarpValue(
+                VarPlayer.SPECIAL_ATTACK_PERCENT));
+        MousePackets.queueClickPacket();
+        WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
+
+      }
+    } else {
+      Inventory.search().nameContains("Abyssal tentacle").first().ifPresent((weapon) -> {
+        InventoryInteraction.useItem(weapon, "Wield");
+      });
+      Inventory.search().nameContains("Avernic defender").first().ifPresent((defender) -> {
+        InventoryInteraction.useItem(defender, "Wield");
+      });
+    }
+  }
+
+  private void specialTest() {
+    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
+      if (Inventory.search().nameContains("Dragon claws").first().isPresent()) {
+        InventoryInteraction.useItem("Dragon claws", "Wield");
+      } else {
+        MousePackets.queueClickPacket();
+        WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
+      }
+    } else {
+      if (Inventory.search().nameContains("Abyssal tentacle").first().isPresent()) {
+        InventoryInteraction.useItem("Abyssal tentacle", "Wield");
+      }
+      if (Inventory.search().nameContains("Avernic defender").first().isPresent()) {
+        InventoryInteraction.useItem("Avernic defender", "Wield");
       }
     }
   }
