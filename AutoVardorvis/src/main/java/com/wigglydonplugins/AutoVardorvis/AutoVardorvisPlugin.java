@@ -93,17 +93,15 @@ public class AutoVardorvisPlugin extends Plugin {
     private State contextBotState;
     private int contextTickDelay;
     private boolean drankSuperCombat;
-    private boolean summonedThrall;
 
     public MainClassContext(Client client, AutoVardorvisConfig config, State passedBotState,
         int passedTickDelay,
-        boolean drankSuperCombat, boolean summonedThrall) {
+        boolean drankSuperCombat) {
       this.client = client;
       this.config = config;
       this.contextBotState = passedBotState;
       this.contextTickDelay = passedTickDelay;
       this.drankSuperCombat = drankSuperCombat;
-      this.summonedThrall = summonedThrall;
     }
   }
 
@@ -112,10 +110,8 @@ public class AutoVardorvisPlugin extends Plugin {
       System.out.println("Null state...");
       return;
     }
-
-    boolean summonedThrall = false;
     MainClassContext context = new MainClassContext(client, config, passedBotState, passedTickDelay,
-        drankSuperCombat, summonedThrall);
+        drankSuperCombat);
     StateHandler stateHandler = new StateHandler();
     stateHandler.handleState(botState, context);
     tickDelay = context.getContextTickDelay();

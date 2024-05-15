@@ -91,7 +91,7 @@ public class BankingState {
       withdraw("Divine super combat", 1);
       withdraw("Rune pouch", 1);
       withdraw("Book of the dead", 1);
-      withdraw("Dragon claws", 1);
+      withdraw("Voidwaker", 1);
       withdraw("Prayer potion", config.PPOTS_TO_BRING());
       withdraw("Manta ray", 100);
       sendKey(KeyEvent.VK_ESCAPE);

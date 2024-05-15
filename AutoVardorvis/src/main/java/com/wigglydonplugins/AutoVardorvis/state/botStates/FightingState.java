@@ -34,7 +34,6 @@ public class FightingState {
   private static WorldPoint safeTile = null;
   private static WorldPoint axeMoveTile = null;
   private boolean drankSuperCombat;
-  private boolean summonedThrall;
   private static int axeTicks = 0;
   private MainClassContext context;
 
@@ -43,7 +42,6 @@ public class FightingState {
     this.context = context;
     AutoVardorvisConfig config = context.getConfig();
     drankSuperCombat = context.isDrankSuperCombat();
-    summonedThrall = context.isSummonedThrall();
     List<NPC> newAxes = NPCs.search().withId(12225).result();
     List<NPC> activeAxes = NPCs.search().withId(12227).result();
     Optional<NPC> vardorvis = NPCs.search().nameContains(VARDORVIS).first();
@@ -96,6 +94,7 @@ public class FightingState {
     doBloodCaptcha();
     drinkPrayer(config.DRINKPRAYERAT());
     eat(config.EATAT());
+    useSpecialAttack();
 
     if (!isInFight(client)) {
       turnOffPrayers();
@@ -126,12 +125,7 @@ public class FightingState {
                 context.setDrankSuperCombat(true);
               });
             }
-            if (!summonedThrall) {
-              summonThrall();
-              summonedThrall = true;
-              context.setSummonedThrall(true);
-            }
-
+            summonThrall();
           });
         } else {
           teleToHouse();
@@ -162,38 +156,15 @@ public class FightingState {
 
     if (!client.getLocalPlayer().isInteracting()) {
       NPCs.search().nameContains(VARDORVIS).first().ifPresent(npc -> {
-//        useSpecialAttack();
-        specialTest();
         NPCInteraction.interact(npc, "Attack");
       });
     }
   }
 
   private void useSpecialAttack() {
-    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500
-        && Inventory.getEmptySlots() > 0) {
-      if (Inventory.search().nameContains("Dragon claws").first().isEmpty()) {
-        EthanApiPlugin.sendClientMessage(
-            "tryin to special attack with claws... percent: " + client.getVarpValue(
-                VarPlayer.SPECIAL_ATTACK_PERCENT));
-        MousePackets.queueClickPacket();
-        WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
-
-      }
-    } else {
-      Inventory.search().nameContains("Abyssal tentacle").first().ifPresent((weapon) -> {
-        InventoryInteraction.useItem(weapon, "Wield");
-      });
-      Inventory.search().nameContains("Avernic defender").first().ifPresent((defender) -> {
-        InventoryInteraction.useItem(defender, "Wield");
-      });
-    }
-  }
-
-  private void specialTest() {
     if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
-      if (Inventory.search().nameContains("Dragon claws").first().isPresent()) {
-        InventoryInteraction.useItem("Dragon claws", "Wield");
+      if (Inventory.search().nameContains("Voidwaker").first().isPresent()) {
+        InventoryInteraction.useItem("Voidwaker", "Wield");
       } else {
         MousePackets.queueClickPacket();
         WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
@@ -201,9 +172,6 @@ public class FightingState {
     } else {
       if (Inventory.search().nameContains("Abyssal tentacle").first().isPresent()) {
         InventoryInteraction.useItem("Abyssal tentacle", "Wield");
-      }
-      if (Inventory.search().nameContains("Avernic defender").first().isPresent()) {
-        InventoryInteraction.useItem("Avernic defender", "Wield");
       }
     }
   }
@@ -214,7 +182,6 @@ public class FightingState {
         "Resurrect Greater Ghost");
     MousePackets.queueClickPacket();
     WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
-    EthanApiPlugin.sendClientMessage("GHOST ACTIVATE ON SPAWN... summonedThrall: ");
   }
 
   private void handleAxeMove() {
