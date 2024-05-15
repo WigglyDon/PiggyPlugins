@@ -170,7 +170,8 @@ public class FightingState {
   }
 
   private void useSpecialAttack() {
-    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
+    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500
+        && Inventory.getEmptySlots() > 0) {
       if (Inventory.search().nameContains("Dragon claws").first().isEmpty()) {
         EthanApiPlugin.sendClientMessage(
             "tryin to special attack with claws... percent: " + client.getVarpValue(
