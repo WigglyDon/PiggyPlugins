@@ -1,5 +1,6 @@
 package com.wigglydonplugins.AutoVardorvis.state.botStates;
 
+import com.example.EthanApiPlugin.Collections.EquipmentItemWidget;
 import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileItems;
@@ -11,6 +12,8 @@ import com.example.InteractionApi.NPCInteraction;
 import com.example.Packets.MousePackets;
 import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
+import com.piggyplugins.PiggyUtils.API.EquipmentUtil;
+import com.piggyplugins.PiggyUtils.API.EquipmentUtil.EquipmentSlot;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
 import com.piggyplugins.PiggyUtils.API.SpellUtil;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisConfig;
@@ -23,6 +26,7 @@ import net.runelite.api.NPC;
 import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
 import net.runelite.api.TileObject;
+import net.runelite.api.VarPlayer;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
 
@@ -33,7 +37,7 @@ public class FightingState {
   private static WorldPoint safeTile = null;
   private static WorldPoint axeMoveTile = null;
   private boolean drankSuperCombat;
-  private boolean summonedThrall = false;
+  private boolean summonedThrall;
   private static int axeTicks = 0;
   private MainClassContext context;
 
@@ -42,6 +46,7 @@ public class FightingState {
     this.context = context;
     AutoVardorvisConfig config = context.getConfig();
     drankSuperCombat = context.isDrankSuperCombat();
+    summonedThrall = context.isSummonedThrall();
     List<NPC> newAxes = NPCs.search().withId(12225).result();
     List<NPC> activeAxes = NPCs.search().withId(12227).result();
     Optional<NPC> vardorvis = NPCs.search().nameContains(VARDORVIS).first();
@@ -125,13 +130,10 @@ public class FightingState {
               });
             }
             if (!summonedThrall) {
-              Widget thrallSpellWidget = SpellUtil.getSpellWidget(client,
-                  "Resurrect Greater Ghost");
-              MousePackets.queueClickPacket();
-              WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
-              EthanApiPlugin.sendClientMessage("GHOST ACTIVATE ON SPAWN");
+              summonThrall();
               summonedThrall = true;
             }
+
           });
         } else {
           teleToHouse();
@@ -162,11 +164,36 @@ public class FightingState {
 
     if (!client.getLocalPlayer().isInteracting()) {
       NPCs.search().nameContains(VARDORVIS).first().ifPresent(npc -> {
-        // add special attack logic
-        // need to track current hp of boss
+        useSpecialAttack();
         NPCInteraction.interact(npc, "Attack");
       });
     }
+  }
+
+  private void useSpecialAttack() {
+    Optional<EquipmentItemWidget> mainHandWeapon = EquipmentUtil.getItemInSlot(
+        EquipmentSlot.MAIN_HAND);
+    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
+      if (mainHandWeapon.isPresent()) {
+        if (mainHandWeapon.get().getName()
+            .equals("Dragon claws")) {
+          EthanApiPlugin.sendClientMessage(
+              "tryin to special attack with claws... percent: " + client.getVarpValue(
+                  VarPlayer.SPECIAL_ATTACK_PERCENT));
+          MousePackets.queueClickPacket();
+          WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
+        }
+      }
+    }
+  }
+
+  private void summonThrall() {
+    EthanApiPlugin.sendClientMessage("summonThrall()");
+    Widget thrallSpellWidget = SpellUtil.getSpellWidget(client,
+        "Resurrect Greater Ghost");
+    MousePackets.queueClickPacket();
+    WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+    EthanApiPlugin.sendClientMessage("GHOST ACTIVATE ON SPAWN... summonedThrall: ");
   }
 
   private void handleAxeMove() {
@@ -252,7 +279,6 @@ public class FightingState {
     EthanApiPlugin.sendClientMessage("teleporting to house");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
-    summonedThrall = false;
     safeTile = null;
     axeMoveTile = null;
     context.setContextBotState(State.GO_TO_BANK);
