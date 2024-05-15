@@ -100,7 +100,6 @@ public class FightingState {
     drinkPrayer(config.DRINKPRAYERAT());
     eat(config.EATAT());
     useSpecialAttack();
-    EthanApiPlugin.sendClientMessage("vardorvis hp percent: " + vardorvisHpPercent);
 
     if (!isInFight(client)) {
       turnOffPrayers();
