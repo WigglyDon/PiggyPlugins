@@ -90,6 +90,8 @@ public class BankingState {
       withdraw("Teleport to house", 50);
       withdraw("Divine super combat", 1);
       withdraw("Rune pouch", 1);
+      withdraw("Soul rune", 1000);
+      withdraw("Death rune", 1000);
       withdraw("Book of the dead", 1);
       withdraw("Voidwaker", 1);
       withdraw("Prayer potion", config.PPOTS_TO_BRING());

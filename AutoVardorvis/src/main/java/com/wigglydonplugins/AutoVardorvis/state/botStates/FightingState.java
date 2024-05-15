@@ -34,6 +34,7 @@ public class FightingState {
   private static WorldPoint safeTile = null;
   private static WorldPoint axeMoveTile = null;
   private boolean drankSuperCombat;
+  private static boolean hasCastDeathCharge = false;
   private static int axeTicks = 0;
   private static int specTicks = 0;
   private static int thrallTicks = 0;
@@ -164,6 +165,11 @@ public class FightingState {
         NPCInteraction.interact(npc, "Attack");
       });
     }
+    if (vardorvisHpPercent <= 30 && !hasCastDeathCharge) {
+      castDeathCharge();
+      hasCastDeathCharge = true;
+    }
+
   }
 
   private void useSpecialAttack() {
@@ -184,6 +190,13 @@ public class FightingState {
         InventoryInteraction.useItem("Abyssal tentacle", "Wield");
       }
     }
+  }
+
+  private void castDeathCharge() {
+    Widget deathChargeWidget = SpellUtil.getSpellWidget(client,
+        "Death Charge");
+    MousePackets.queueClickPacket();
+    WidgetPackets.queueWidgetAction(deathChargeWidget, "Cast");
   }
 
   private void summonThrall() {
@@ -302,6 +315,7 @@ public class FightingState {
     }
     if (currentHp == 0 && vardorvisHpPercent == 0) {
       vardorvisHpPercent = 100;
+      hasCastDeathCharge = false;
     }
   }
 }
