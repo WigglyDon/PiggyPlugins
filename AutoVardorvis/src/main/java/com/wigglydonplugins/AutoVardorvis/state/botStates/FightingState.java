@@ -294,6 +294,7 @@ public class FightingState {
     drankSuperCombat = false;
     safeTile = null;
     axeMoveTile = null;
+    vardorvisHpPercent = 100;
     context.setContextBotState(State.GO_TO_BANK);
   }
 
@@ -316,6 +317,7 @@ public class FightingState {
     if (currentHp == 0 && vardorvisHpPercent == 0) {
       vardorvisHpPercent = 100;
       hasCastDeathCharge = false;
+      axeTicks = 0;
     }
   }
 }
