@@ -5,6 +5,7 @@ import com.example.EthanApiPlugin.Collections.Inventory;
 import com.example.EthanApiPlugin.Collections.NPCs;
 import com.example.EthanApiPlugin.Collections.TileObjects;
 import com.example.EthanApiPlugin.Collections.Widgets;
+import com.example.EthanApiPlugin.EthanApiPlugin;
 import com.example.InteractionApi.BankInteraction;
 import com.example.InteractionApi.InventoryInteraction;
 import com.example.InteractionApi.NPCInteraction;
@@ -78,6 +79,7 @@ public class BankingState {
 
   private void bank() {
     if (Bank.isOpen() && !preparedForTrip() && Inventory.getEmptySlots() != 28) {
+      EthanApiPlugin.sendClientMessage("bank(): 1");
       Widgets.search()
           .filter(widget -> widget.getParentId() != 786474).withAction("Deposit inventory").first()
           .ifPresent(button -> {
@@ -85,6 +87,7 @@ public class BankingState {
             WidgetPackets.queueWidgetAction(button, "Deposit inventory");
           });
     } else if (!preparedForTrip()) {
+      EthanApiPlugin.sendClientMessage("bank(): 2");
       withdraw("Ring of shadows", 1);
       withdraw("Teleport to house", 50);
       withdraw("Divine super combat", 1);
@@ -95,6 +98,7 @@ public class BankingState {
       withdraw("Manta ray", 100);
       sendKey(KeyEvent.VK_ESCAPE);
     } else {
+      EthanApiPlugin.sendClientMessage("bank(): 3");
       sendKey(KeyEvent.VK_ESCAPE);
     }
   }

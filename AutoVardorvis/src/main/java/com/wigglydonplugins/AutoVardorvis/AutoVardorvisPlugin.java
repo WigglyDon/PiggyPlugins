@@ -9,6 +9,7 @@ import com.example.Packets.WidgetPackets;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
+import com.piggyplugins.PiggyUtils.API.SpellUtil;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
 import lombok.Getter;
@@ -23,6 +24,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -150,6 +152,14 @@ public class AutoVardorvisPlugin extends Plugin {
         Inventory.search().nameContains("Divine super combat").first().ifPresent(potion -> {
           InventoryInteraction.useItem(potion, "Drink");
         });
+      }
+    }
+    if (event.getVarbitId() == Varbits.RESURRECT_THRALL) {
+      if (event.getValue() == 0) {
+        Widget thrallSpellWidget = SpellUtil.getSpellWidget(client, "Resurrect Greater Ghost");
+        MousePackets.queueClickPacket();
+        WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+        EthanApiPlugin.sendClientMessage("GHOST ACTIVATE");
       }
     }
   }

@@ -12,6 +12,7 @@ import com.example.Packets.MousePackets;
 import com.example.Packets.MovementPackets;
 import com.example.Packets.WidgetPackets;
 import com.piggyplugins.PiggyUtils.API.PrayerUtil;
+import com.piggyplugins.PiggyUtils.API.SpellUtil;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisConfig;
 import com.wigglydonplugins.AutoVardorvis.AutoVardorvisPlugin.MainClassContext;
 import com.wigglydonplugins.AutoVardorvis.state.StateHandler.State;
@@ -122,13 +123,16 @@ public class FightingState {
                 context.setDrankSuperCombat(true);
               });
             }
+            Widget thrallSpellWidget = SpellUtil.getSpellWidget(client, "Resurrect Greater Ghost");
+            MousePackets.queueClickPacket();
+            WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+            EthanApiPlugin.sendClientMessage("GHOST ACTIVATE ON SPAWN");
           });
-          return;
         } else {
           teleToHouse();
           context.setContextTickDelay(3);
-          return;
         }
+        return;
       } else if (vardorvis.get().getWorldLocation().getX() == safeTile.getX()) {
         EthanApiPlugin.sendClientMessage("Vardorvis stuck");
         movePlayerToTile(safeTile);
@@ -153,7 +157,6 @@ public class FightingState {
 
     if (!client.getLocalPlayer().isInteracting()) {
       NPCs.search().nameContains(VARDORVIS).first().ifPresent(npc -> {
-        //check if main attack
         // add special attack logic
         // need to track current hp of boss
         NPCInteraction.interact(npc, "Attack");
