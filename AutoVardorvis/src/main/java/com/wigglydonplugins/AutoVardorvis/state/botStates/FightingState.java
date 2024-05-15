@@ -194,6 +194,7 @@ public class FightingState {
           "Resurrect Greater Ghost");
       MousePackets.queueClickPacket();
       WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+      thrallTicks = 10;
     }
   }
 
