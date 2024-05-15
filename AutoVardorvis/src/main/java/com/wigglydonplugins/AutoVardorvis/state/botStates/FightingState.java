@@ -36,8 +36,8 @@ public class FightingState {
   private boolean drankSuperCombat;
   private static int axeTicks = 0;
   private static int specTicks = 0;
+  private static int thrallTicks = 0;
   private static int vardorvisHpPercent = 100;
-  private static boolean hasSummonedThrall = false;
   private MainClassContext context;
 
   public void execute(MainClassContext context) {
@@ -187,12 +187,14 @@ public class FightingState {
   }
 
   private void summonThrall() {
-    EthanApiPlugin.sendClientMessage("summonThrall()");
-    Widget thrallSpellWidget = SpellUtil.getSpellWidget(client,
-        "Resurrect Greater Ghost");
-    MousePackets.queueClickPacket();
-    WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
-    hasSummonedThrall = true;
+    if (thrallTicks > 0) {
+      thrallTicks--;
+    } else if (thrallTicks == 0) {
+      Widget thrallSpellWidget = SpellUtil.getSpellWidget(client,
+          "Resurrect Greater Ghost");
+      MousePackets.queueClickPacket();
+      WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+    }
   }
 
   private void handleAxeMove() {
@@ -278,7 +280,6 @@ public class FightingState {
     drankSuperCombat = false;
     safeTile = null;
     axeMoveTile = null;
-    hasSummonedThrall = false;
     context.setContextBotState(State.GO_TO_BANK);
   }
 

@@ -158,7 +158,6 @@ public class AutoVardorvisPlugin extends Plugin {
         Widget thrallSpellWidget = SpellUtil.getSpellWidget(client, "Resurrect Greater Ghost");
         MousePackets.queueClickPacket();
         WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
-        EthanApiPlugin.sendClientMessage("GHOST ACTIVATE");
       }
     }
   }
