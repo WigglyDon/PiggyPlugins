@@ -35,6 +35,8 @@ public class FightingState {
   private static WorldPoint axeMoveTile = null;
   private boolean drankSuperCombat;
   private static int axeTicks = 0;
+  private static int specTicks = 0;
+  private static boolean hasSummonedThrall = false;
   private MainClassContext context;
 
   public void execute(MainClassContext context) {
@@ -72,6 +74,7 @@ public class FightingState {
 
     //axe dodge
     if (safeTile != null) {
+      EthanApiPlugin.sendClientMessage("Axe ticks: " + axeTicks);
       if (!newAxes.isEmpty()) {
         newAxes.forEach((axe) -> {
           if (axe.getWorldLocation().getX() == safeTile.getX() - 1
@@ -162,12 +165,16 @@ public class FightingState {
   }
 
   private void useSpecialAttack() {
+    if (specTicks > 0) {
+      specTicks--;
+    }
     if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
       if (Inventory.search().nameContains("Voidwaker").first().isPresent()) {
         InventoryInteraction.useItem("Voidwaker", "Wield");
-      } else {
+      } else if (specTicks == 0) {
         MousePackets.queueClickPacket();
         WidgetPackets.queueWidgetActionPacket(1, 10485795, -1, -1);
+        specTicks = 6;
       }
     } else {
       if (Inventory.search().nameContains("Abyssal tentacle").first().isPresent()) {
@@ -182,15 +189,14 @@ public class FightingState {
         "Resurrect Greater Ghost");
     MousePackets.queueClickPacket();
     WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+    hasSummonedThrall = true;
   }
 
   private void handleAxeMove() {
     switch (axeTicks) {
-
       case 0:
         break;
       case 1:
-
         movePlayerToTile(axeMoveTile);
         break;
     }
@@ -269,6 +275,7 @@ public class FightingState {
     drankSuperCombat = false;
     safeTile = null;
     axeMoveTile = null;
+    hasSummonedThrall = false;
     context.setContextBotState(State.GO_TO_BANK);
   }
 
