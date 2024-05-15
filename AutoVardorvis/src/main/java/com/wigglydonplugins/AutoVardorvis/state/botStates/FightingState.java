@@ -36,6 +36,7 @@ public class FightingState {
   private boolean drankSuperCombat;
   private static int axeTicks = 0;
   private static int specTicks = 0;
+  private static int vardorvisHpPercent = 100;
   private static boolean hasSummonedThrall = false;
   private MainClassContext context;
 
@@ -49,6 +50,8 @@ public class FightingState {
     Optional<NPC> vardorvis = NPCs.search().nameContains(VARDORVIS).first();
     WorldPoint playerTile = client.getLocalPlayer().getWorldLocation();
     Optional<TileObject> safeRock = TileObjects.search().withAction("Leave").first();
+
+    vardorvis.ifPresent(FightingState::updateNpcHp);
 
     if (!TileItems.search().empty()) {
       TileItems.search().first().ifPresent((item) -> {
@@ -74,7 +77,6 @@ public class FightingState {
 
     //axe dodge
     if (safeTile != null) {
-      EthanApiPlugin.sendClientMessage("Axe ticks: " + axeTicks);
       if (!newAxes.isEmpty()) {
         newAxes.forEach((axe) -> {
           if (axe.getWorldLocation().getX() == safeTile.getX() - 1
@@ -98,6 +100,7 @@ public class FightingState {
     drinkPrayer(config.DRINKPRAYERAT());
     eat(config.EATAT());
     useSpecialAttack();
+    EthanApiPlugin.sendClientMessage("vardorvis hp percent: " + vardorvisHpPercent);
 
     if (!isInFight(client)) {
       turnOffPrayers();
@@ -168,7 +171,8 @@ public class FightingState {
     if (specTicks > 0) {
       specTicks--;
     }
-    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500) {
+    if (client.getVarpValue(VarPlayer.SPECIAL_ATTACK_PERCENT) >= 500 && (vardorvisHpPercent != 100
+        && vardorvisHpPercent >= 50)) {
       if (Inventory.search().nameContains("Voidwaker").first().isPresent()) {
         InventoryInteraction.useItem("Voidwaker", "Wield");
       } else if (specTicks == 0) {
@@ -281,6 +285,23 @@ public class FightingState {
 
   private boolean needsToDrinkPrayer(int at) {
     return client.getBoostedSkillLevel(Skill.PRAYER) <= at;
+  }
+
+  public static int getHpPercentValue(float ratio, float scale) {
+    return Math.round((ratio / scale) * 100f);
+  }
+
+  public static void updateNpcHp(NPC npc) {
+    float healthRatio = npc.getHealthRatio();
+    float healthScale = npc.getHealthScale();
+    int currentHp = getHpPercentValue(healthRatio, healthScale);
+
+    if (currentHp < vardorvisHpPercent && currentHp > -1) {
+      vardorvisHpPercent = currentHp;
+    }
+    if (currentHp == 0 && vardorvisHpPercent == 0) {
+      vardorvisHpPercent = 100;
+    }
   }
 }
 
