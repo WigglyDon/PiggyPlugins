@@ -33,6 +33,7 @@ public class FightingState {
   private static WorldPoint safeTile = null;
   private static WorldPoint axeMoveTile = null;
   private boolean drankSuperCombat;
+  private boolean summonedThrall = false;
   private static int axeTicks = 0;
   private MainClassContext context;
 
@@ -123,10 +124,14 @@ public class FightingState {
                 context.setDrankSuperCombat(true);
               });
             }
-            Widget thrallSpellWidget = SpellUtil.getSpellWidget(client, "Resurrect Greater Ghost");
-            MousePackets.queueClickPacket();
-            WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
-            EthanApiPlugin.sendClientMessage("GHOST ACTIVATE ON SPAWN");
+            if (!summonedThrall) {
+              Widget thrallSpellWidget = SpellUtil.getSpellWidget(client,
+                  "Resurrect Greater Ghost");
+              MousePackets.queueClickPacket();
+              WidgetPackets.queueWidgetAction(thrallSpellWidget, "Cast");
+              EthanApiPlugin.sendClientMessage("GHOST ACTIVATE ON SPAWN");
+              summonedThrall = true;
+            }
           });
         } else {
           teleToHouse();
@@ -247,6 +252,7 @@ public class FightingState {
     EthanApiPlugin.sendClientMessage("teleporting to house");
     InventoryInteraction.useItem("Teleport to house", "Break");
     drankSuperCombat = false;
+    summonedThrall = false;
     safeTile = null;
     axeMoveTile = null;
     context.setContextBotState(State.GO_TO_BANK);
