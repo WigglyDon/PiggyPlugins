@@ -42,7 +42,7 @@ public class BankingState {
 
     if (preparedForTrip() && !Bank.isOpen() && NPCs.search().nameContains("Jack").nearestToPlayer()
         .isPresent()) {
-      
+
       Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
         client.runScript(299, 1, 0, 0);
       });
@@ -88,6 +88,9 @@ public class BankingState {
       withdraw("Ring of shadows", 1);
       withdraw("Teleport to house", 50);
       withdraw("Divine super combat", 1);
+      withdraw("Rune pouch", 1);
+      withdraw("Book of the dead", 1);
+      withdraw("Dragon claws", 1);
       withdraw("Prayer potion", config.PPOTS_TO_BRING());
       withdraw("Manta ray", 100);
       sendKey(KeyEvent.VK_ESCAPE);
