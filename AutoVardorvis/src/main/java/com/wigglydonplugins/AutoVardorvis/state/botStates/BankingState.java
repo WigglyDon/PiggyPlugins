@@ -71,6 +71,8 @@ public class BankingState {
     } else if (Bank.isOpen() && !preparedForTrip()) {
       bank();
     } else if (Bank.isOpen() && preparedForTrip()) {
+      EthanApiPlugin.sendClientMessage("bank(): 4");
+      sendKey(KeyEvent.VK_ESCAPE);
       Widgets.search().withTextContains("Enter amount:").first().ifPresent(w -> {
         client.runScript(299, 1, 0, 0);
       });
